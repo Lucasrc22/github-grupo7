@@ -1,3 +1,7 @@
+# Baseado no template oficial do GitHub + ajustes    #
+#   Última revisão: 2025-09-06                         #
+#   Versão: 1.0                 
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
