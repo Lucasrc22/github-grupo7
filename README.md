@@ -6,3 +6,4 @@ Repositório para atividade prática de Git \& GitHub em equipe
 
 "Rafael Herculano criou o arquivo Rafael Herculano.txt"
 
+"Elayne criou o arquivo elayne.txt"
