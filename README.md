@@ -18,7 +18,7 @@ Repositório para atividade prática de Git \& GitHub em equipe.
 
 ## **Objetivo**
 
-Praticar o fluxo de trabalho em grupo com Git e GitHub. Cada membro do grupo
+Praticar o fluxo de trabalho em equipe com Git e GitHub. Cada membro da equipe
 deverá contribuir em arquivos compartilhados, simulando um projeto em equipe.
 
 ## **Modificações**
