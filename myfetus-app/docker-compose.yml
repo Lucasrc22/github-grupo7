@@ -1,0 +1,13 @@
+services:
+  expo:
+    build: .
+    container_name: myfetus-app-expo
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8082:8082"
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
