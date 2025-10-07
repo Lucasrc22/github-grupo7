@@ -8,6 +8,8 @@
 
 **Docente:** Wylliams Santos
 
+
+
 **Discentes:** Alter Guedes, Bruno Eduardo de Vasconcelos, Elayne Vitória, Lucas Ribeiro, Maria José Cordeiro, Rafael Herculano e Thiago Brito
 
 ---
@@ -25,5 +27,6 @@ deverá contribuir em arquivos compartilhados, simulando um projeto em equipe.
 
 - "Lucas criou o arquivo Lucas.txt".
 - "Rafael Herculano criou o arquivo Rafael Herculano.txt".
+- "Elayne criou o arquivo elayne.txt"
 - "Thiago Brito organizou os diretórios, README.MD e criou o arquivo [`thiago_brito.txt`](mebers-presentation\thiago_brito.txt).
 - Maria criou o arquivo Maria.txt
