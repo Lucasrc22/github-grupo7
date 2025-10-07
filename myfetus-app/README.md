@@ -18,7 +18,7 @@ Certifique-se de ter instalado:
 - [Expo Go para Android](https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=www)
 - [Expo Go para IOS](https://itunes.apple.com/app/apple-store/id982107779)
 
-### Instalando dependências
+### Instalando dependências:
 
 ```bash
 git clone https://github.com/myfetus/myfetus-app.git
@@ -29,4 +29,5 @@ npm install
 ```
 
 ### [Configurando a database](https://github.com/myfetus/myfetus-app/tree/backend/myFetus/backend/PostgresQL.md)
+### Modificação feita por Maria
 
