@@ -1,0 +1,9 @@
+node_modules/
+.expo/
+.git/
+.gitignore
+*.log
+.vscode/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
