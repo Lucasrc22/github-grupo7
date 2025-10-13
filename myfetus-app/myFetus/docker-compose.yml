@@ -1,4 +1,42 @@
+version: "3.9"
+
 services:
+  db:
+    image: postgres:15-alpine
+    container_name: myfetus-db
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5433:5432"   # ✅ Mudei para evitar conflito com o PostgreSQL local
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    networks:
+      - myfetus-net
+
+  backend:
+    build:
+      context: ./backend
+    container_name: myfetus-backend
+    ports:
+      - "3000:3000"
+    environment:
+      PG_USER: myuser
+      PG_PASSWORD: mypassword
+      PG_DATABASE: mydatabase
+      PG_HOST: db
+      PG_PORT: 5432
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - myfetus-net
+
   expo:
     build: .
     container_name: myfetus-app-expo
@@ -12,6 +50,19 @@ services:
       - /app/node_modules
     environment:
       HOST: 0.0.0.0
-      EXPO_PACKAGER_HOSTNAME: 0.0.0.0
+      EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0  # ✅ mais seguro que EXPO_PACKAGER_HOSTNAME
+      REACT_NATIVE_PACKAGER_HOSTNAME: 0.0.0.0
+    depends_on:
+      - backend
+      - db
     stdin_open: true
     tty: true
+    networks:
+      - myfetus-net
+
+volumes:
+  db_data:
+
+networks:
+  myfetus-net:
+    driver: bridge

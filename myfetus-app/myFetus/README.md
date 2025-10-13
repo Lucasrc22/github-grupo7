@@ -48,3 +48,11 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+2. Build e inicialize os containers Docker:
+
+```bash
+docker compose up -d --build
+
+docker exec -it myfetus-db psql -U myuser -d mydatabase
