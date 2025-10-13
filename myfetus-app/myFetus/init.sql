@@ -1,7 +1,3 @@
--- =========================================
--- Script de inicialização do banco de dados
--- =========================================
-
 -- Criar a tabela de gestantes com todos os campos adicionais
 CREATE TABLE IF NOT EXISTS pregnants (
     id SERIAL PRIMARY KEY,

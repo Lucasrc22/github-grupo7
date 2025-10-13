@@ -56,3 +56,21 @@ Join our community of developers creating universal apps.
 docker compose up -d --build
 
 docker exec -it myfetus-db psql -U myuser -d mydatabase
+
+3. Abrir o Banco de Dados:
+docker exec -it myfetus-db sh
+ou
+docker exec -it myfetus-db bash
+
+
+4. Entrar no console do PostgreSQL:
+
+psql -U myuser -d mydatabase
+
+5. Listar tabelas:
+
+\dt
+
+6. Mostrar colunas da tabela:
+
+\d pregnants
