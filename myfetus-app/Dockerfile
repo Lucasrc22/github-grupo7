@@ -1,8 +1,7 @@
 FROM node:20-alpine
 WORKDIR /app
-COPY package.json ./ 
-# FORCED_REBUILD_V3
+COPY myFetus/package.json myFetus/yarn.lock ./
 RUN yarn install --frozen-lockfile --network-timeout 100000
-COPY . .
+COPY myFetus/ ./
 EXPOSE 19000 19001 19002
-CMD ["yarn", "start", "-c"]
+CMD ["npx", "expo", "start", "--tunnel"]
