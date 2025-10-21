@@ -6,30 +6,51 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  ImageBackground
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from "expo-router";
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type RootStackParamList = {
+  OutraGestacao: undefined;
+  Cadastro: undefined;
+};
+
+type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'OutraGestacao'>;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const router = useRouter();
+  const navigation = useNavigation<LoginScreenNavigationProp>();
 
-  const handleLogin = () => {
-    console.log("Fazer login com:", email, senha);
-    router.push("/outra-gestacao");
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://0.0.0.0:3000/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, senha }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha no login');
+      }
+
+      const data = await response.json();
+      console.log('Usuário autenticado:', data);
+      navigation.navigate('OutraGestacao');
+    } catch (error) {
+      console.error('Erro no login:', error);
+    }
   };
 
   const handleCreateAccount = () => {
-    router.push("/cadastro");
+    navigation.navigate('Cadastro');
   };
 
   return (
-    <LinearGradient
-      colors={["#cce5f6", "#f8cde9"]}
-      style={styles.container}
-    >
+    <LinearGradient colors={["#cce5f6", "#f8cde9"]} style={styles.container}>
       <View style={styles.headerContainer}>
         <Image
           source={require("../assets/images/myfetus-logo.png")}
@@ -49,7 +70,7 @@ export default function LoginScreen() {
             placeholder="E-mail"
             value={email}
             onChangeText={setEmail}
-            style={[styles.input, { marginTop:60}]}
+            style={[styles.input, { marginTop: 60 }]}
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor="#f9a9a7"
@@ -62,6 +83,7 @@ export default function LoginScreen() {
             style={styles.input}
             placeholderTextColor="#f9a9a7"
           />
+
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
@@ -88,33 +110,31 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 30
+    paddingHorizontal: 30,
   },
   headerContainer: {
     width: "100%",
     height: 200,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40
+    marginTop: 40,
   },
   contentContainer: {
     flex: 1,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    position: "relative"
   },
   footerContainer: {
     width: "100%",
     height: 100,
     alignItems: "center",
     justifyContent: "center",
-    // marginBottom: 20
   },
   logoMain: {
     width: 250,
     height: 160,
-    alignSelf: "center"
+    alignSelf: "center",
   },
   heartImage: {
     width: 120,
@@ -142,7 +162,7 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: "#fff"
+    borderColor: "#fff",
   },
   loginButton: {
     backgroundColor: "#f9a9a7",
@@ -150,20 +170,20 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: "100%",
     alignItems: "center",
-    marginBottom: 10
+    marginBottom: 10,
   },
   loginText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 16
+    fontSize: 16,
   },
   createAccountText: {
     color: "#20B2AA",
     fontWeight: "bold",
-    fontSize: 14
+    fontSize: 14,
   },
   logo: {
     width: 240,
-    height: 80
-  }
+    height: 80,
+  },
 });

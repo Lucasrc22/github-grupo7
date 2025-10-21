@@ -97,7 +97,7 @@ export default function Cadastro() {
       const [dia, mes, ano] = dataNascimento.split('/');
       const dataFormatada = `${ano}-${mes}-${dia}`;
 
-      const response = await fetch('http://localhost:3000/users', {
+      const response = await fetch('http://0.0.0.0:3000/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

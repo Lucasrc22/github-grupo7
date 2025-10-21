@@ -13,7 +13,7 @@ services:
       - db_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5433:5432"  # (externo 5433 → interno 5432)
+      - "5433:5432"
     networks:
       - myfetus-net
 
@@ -27,13 +27,16 @@ services:
       PG_USER: myuser
       PG_PASSWORD: mypassword
       PG_DATABASE: mydatabase
-      PG_HOST: myfetus-db     # nome do container do banco (importante!)
+      PG_HOST: myfetus-db
       PG_PORT: 5432
+      PORT: 3000
     ports:
       - "3000:3000"
+    command: ["node", "server.js"] # 👈 inicia o backend
     volumes:
       - ./backend:/app
       - /app/node_modules
+    working_dir: /app
     networks:
       - myfetus-net
     restart: always
