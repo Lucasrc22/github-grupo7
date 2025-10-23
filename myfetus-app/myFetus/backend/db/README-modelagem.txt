@@ -25,3 +25,6 @@ Esse esquema permite:
 Arquivo relacionado:
 - `create_tables.sql` → contém o código SQL da criação da tabela.
 - `triggers.sql` → contém a função e trigger para atualização do campo `updated_at`.
+
+Entrar no Banco de Dados no docker:
+- 'docker exec -it myfetus-db psql -U myuser -d mydatabase'
