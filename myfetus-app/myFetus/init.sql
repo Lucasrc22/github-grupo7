@@ -139,6 +139,7 @@ CREATE TABLE IF NOT EXISTS pregnancies (
     dpp DATE NOT NULL,
     ccn FLOAT DEFAULT 0.0,
     dgm FLOAT DEFAULT 0.0,
+    glicemia DOUBLE PRECISION,
     regularidade_do_ciclo BOOLEAN DEFAULT TRUE,
     ig_ultrassonografia DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -177,21 +178,4 @@ CREATE TABLE IF NOT EXISTS medidas_fetais (
     crl FLOAT DEFAULT 0.0,
     dgn FLOAT DEFAULT 0.0,
     idade_gestacional_semanas INTEGER NOT NULL
-);
-
--- =====================================================
--- INSERÇÃO INICIAL
--- =====================================================
-INSERT INTO users (name, email, password, birthdate, role)
-VALUES ('Usuária de Teste', 'teste@example.com', 'senha123', '1995-06-20', 'user');
-
-INSERT INTO pregnants (
-    user_id, altura, peso_pregestacional, peso_atual,
-    antecedentes_diabetes, antecedentes_hipertensao, gestacao_partos, gestacao_abortos,
-    gestacao_atual_fumante, gestacao_atual_alcool, vacina_antitetanica, vacina_hepatite_b, vacina_covid19
-)
-VALUES (
-    1, 1.65, 68.5, 70.2,
-    FALSE, FALSE, 1, 0,
-    FALSE, TRUE, TRUE, TRUE, TRUE
 );

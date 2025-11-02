@@ -42,6 +42,7 @@ PREGNANCY_PAYLOAD=$(cat <<EOF
   "is_checked": false,
   "ccn": 0.0,
   "dgm": 0.0,
+  "glicemia": 87.5,
   "regularidade_do_ciclo": true
 }
 EOF
