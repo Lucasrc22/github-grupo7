@@ -2,11 +2,11 @@ const client = require('../backend');
 const updateEntity = require('../utils/updateEntity');
 
 const createEvent = async (req, res) => {
-  const { pregnancy_id, description, event_date } = req.body;
+  const { pregnancy_id, descricao, data_evento } = req.body;
   try {
     const result = await client.query(
-      'INSERT INTO pregnancy_events (pregnancy_id, description, event_date) VALUES ($1, $2, $3) RETURNING *',
-      [pregnancy_id, description, event_date]
+      'INSERT INTO pregnancy_events (pregnancy_id, descricao, data_evento) VALUES ($1, $2, $3) RETURNING *',
+      [pregnancy_id, descricao, data_evento]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {

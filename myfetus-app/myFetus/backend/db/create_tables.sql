@@ -136,8 +136,8 @@ CREATE TABLE IF NOT EXISTS pregnancies (
 CREATE TABLE IF NOT EXISTS pregnancy_events (
   id SERIAL PRIMARY KEY,
   pregnancy_id INTEGER REFERENCES pregnancies(id) ON DELETE CASCADE,
-  description TEXT NOT NULL,
-  event_date DATE NOT NULL,
+  descricao TEXT NOT NULL,
+  data_evento DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

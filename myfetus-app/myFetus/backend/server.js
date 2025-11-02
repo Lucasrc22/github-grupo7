@@ -28,8 +28,8 @@ const medicoesRoutes = require('./routes/medicoes');
 app.use('/api/users', userRoutes);
 app.use('/api/pregnants', pregnantRoutes);
 app.use('/api/pregnancies', pregnancyRoutes);
-app.use('/api/pregnancy-events', pregnancyEventsRoutes);
-app.use('/api/pregnant-documents', documentsRoutes);
+app.use('/api/pregnancyEvents', pregnancyEventsRoutes);
+app.use('/api/documents', documentsRoutes);
 app.use('/api/medicoes', medicoesRoutes);
 
 //Rota de teste (para verificar se o backend está no ar)
