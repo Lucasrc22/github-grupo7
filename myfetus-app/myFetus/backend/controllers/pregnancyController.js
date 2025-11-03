@@ -1,8 +1,23 @@
+/**
+ * Controlador responsável por gerenciar informações de gestações.
+ * Inclui funções para criação, listagem, atualização e cálculo de DPP (Data Provável do Parto).
+  */
 const client = require('../backend');
 const updateEntity = require('../utils/updateEntity');
 
+/**
+ * Função 1
+ * Cria um novo registro de gestação associado a uma gestante.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `body` com os campos da gestação (pregnant_id, weeks, dum, dpp, ccn, dgm, glicemia, regularidade_do_ciclo, ig_ultrassonografia).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Registro de gestação criado.
+ */
 const createPregnancy = async (req, res) => {
-  const { pregnant_id, weeks, is_checked = false, dum, dpp, ccn = 0.0, dgm = 0.0, glicemia = 0,regularidade_do_ciclo = true, ig_ultrassonografia } = req.body;
+  const { pregnant_id, weeks, is_checked = false, dum, dpp, ccn = 0.0, dgm = 0.0, glicemia = 0, regularidade_do_ciclo = true, ig_ultrassonografia } = req.body;
 
   if (!dum || !dpp || !ig_ultrassonografia) {
     return res.status(400).json({ error: 'Campos dum, dpp, glicemia e ig_ultrassonografia são obrigatórios' });
@@ -10,7 +25,7 @@ const createPregnancy = async (req, res) => {
   try {
     const result = await client.query(
       'INSERT INTO pregnancies (pregnant_id, weeks, is_checked, dum, dpp, ccn, dgm, glicemia, regularidade_do_ciclo, ig_ultrassonografia) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-      [pregnant_id, weeks, is_checked, dum, dpp, ccn, dgm,glicemia, regularidade_do_ciclo, ig_ultrassonografia]
+      [pregnant_id, weeks, is_checked, dum, dpp, ccn, dgm, glicemia, regularidade_do_ciclo, ig_ultrassonografia]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -18,6 +33,17 @@ const createPregnancy = async (req, res) => {
   }
 };
 
+/**
+ * Função 2
+ * Retorna todas as gestações cadastradas.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição HTTP.
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Lista de gestações existentes no banco de dados.
+ */
 const getPregnancies = async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM pregnancies');
@@ -27,6 +53,18 @@ const getPregnancies = async (req, res) => {
   }
 };
 
+
+/**
+ * Função 3
+ * Atualiza os dados de uma gestação existente.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID da gestação) e `body` (campos a atualizar).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Registro atualizado da gestação.
+ */
 const updatePregnancy = async (req, res) => {
   try {
     const updatedPregnancy = await updateEntity('pregnancies', req.params.id, req.body);
@@ -37,6 +75,17 @@ const updatePregnancy = async (req, res) => {
   }
 };
 
+/**
+ * Função 4
+ * Atualiza a Data Provável do Parto (DPP) com base na Data da Última Menstruação (DUM).
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição HTTP.
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Gestação com a DPP recalculada.
+ */
 const updateDPP = async (req, res) => {
   try {
     const dum = await client.query('SELECT dum FROM pregnancies');
@@ -49,6 +98,16 @@ const updateDPP = async (req, res) => {
   }
 };
 
+/**
+ * Função 5
+ * Calcula a Data Provável do Parto (DPP) a partir da Data da Última Menstruação (DUM).
+ * 
+ * Parâmetros:
+ *  - dum[string]: Data da última menstruação (no formato ISO).
+ * 
+ * Retorno:
+ *  - [string]: Data provável do parto (no formato ISO, "YYYY-MM-DD").
+ */
 function calculateDPPfromDUM(dum) {
   const dumDate = new Date(dum);
   const dpp = new Date(dumDate);
@@ -59,8 +118,9 @@ function calculateDPPfromDUM(dum) {
   return dpp.toISOString().split('T')[0];
 }
 
-module.exports = { 
-  createPregnancy, 
-  getPregnancies, 
+module.exports = {
+  createPregnancy,
+  getPregnancies,
   updatePregnancy,
-  updateDPP };
+  updateDPP
+};

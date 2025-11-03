@@ -1,8 +1,23 @@
+/**
+ * Controlador responsável por gerenciar documentos de gestantes.
+ * Inclui funções para upload, listagem, consulta, atualização e exclusão de documentos.
+ */
 const path = require('path');
 const fs = require('fs');
 const client = require('../backend');
 const updateEntity = require('../utils/updateEntity');
 
+/**
+ * Função 1
+ * Faz o upload de um documento e associa à gestante correspondente.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `file` (arquivo enviado) e `body` (pregnant_id, document_name, document_type).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Documento inserido no banco de dados e mensagem de sucesso.
+ */
 const uploadDocument = async (req, res) => {
   try {
     if (!req.file) return res.status(400).send('Nenhum arquivo enviado.');
@@ -30,6 +45,17 @@ const uploadDocument = async (req, res) => {
   }
 };
 
+/**
+ * Função 2
+ * Lista todos os documentos associados a uma gestante.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `query.pregnant_id` (ID da gestante).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Lista de documentos cadastrados.
+ */
 const getDocuments = async (req, res) => {
   const { pregnant_id } = req.query;
 
@@ -47,6 +73,17 @@ const getDocuments = async (req, res) => {
   }
 };
 
+/**
+ * Função 3
+ * Retorna um documento específico pelo ID.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do documento).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Documento correspondente ao ID informado.
+ */
 const getDocumentById = async (req, res) => {
   const { id } = req.params;
 
@@ -66,6 +103,17 @@ const getDocumentById = async (req, res) => {
   }
 };
 
+/**
+ * Função 4
+ * Exclui um documento e o arquivo físico associado.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do documento).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Mensagem de confirmação da exclusão.
+ */
 const deleteDocument = async (req, res) => {
   const { id } = req.params;
 
@@ -94,6 +142,17 @@ const deleteDocument = async (req, res) => {
   }
 };
 
+/**
+ * Função 5
+ * Atualiza as informações de um documento existente.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do documento) e `body` (dados para atualização).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Documento atualizado.
+ */
 const updateDocument = async (req, res) => {
   try {
     // updateEntity deve receber o nome correto da tabela

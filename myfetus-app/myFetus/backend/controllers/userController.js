@@ -1,3 +1,7 @@
+/**
+ * Controlador responsável por gerenciar usuários do sistema.
+ * Inclui funções para criação, listagem, consulta, atualização, exclusão e autenticação de usuários.
+ */
 const client = require('../backend');
 const updateEntity = require('../utils/updateEntity');
 const bcrypt = require('bcrypt');
@@ -5,7 +9,17 @@ const bcrypt = require('bcrypt');
 const SALT_ROUNDS = 10
 
 // TODO: validação
-
+/**
+ * Função 1
+ * Cria um novo usuário com senha criptografada.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `body` com os campos (name, email, password, birthdate, is_active, role).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Usuário criado com sucesso.
+ */
 const createUser = async (req, res) => {
   const { name, email, password, birthdate, is_active = true, role = 'user' } = req.body;
   try {
@@ -20,6 +34,17 @@ const createUser = async (req, res) => {
   }
 };
 
+/**
+ * Função 2
+ * Retorna todos os usuários cadastrados.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição HTTP.
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Lista de usuários.
+ */
 const getUsers = async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM users');
@@ -29,6 +54,17 @@ const getUsers = async (req, res) => {
   }
 };
 
+/**
+ * Função 3
+ * Retorna um usuário específico pelo ID.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do usuário).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Dados do usuário encontrado.
+ */
 const getUserById = async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
@@ -39,6 +75,17 @@ const getUserById = async (req, res) => {
   }
 };
 
+/**
+ * Função 4
+ * Atualiza os dados de um usuário existente, incluindo criptografia da senha se alterada.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do usuário) e `body` (campos a atualizar).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Usuário atualizado.
+ */
 const updateUser = async (req, res) => {
   try {
     const { password, ...rest } = req.body;
@@ -57,6 +104,17 @@ const updateUser = async (req, res) => {
   }
 };
 
+/**
+ * Função 5
+ * Exclui um usuário do sistema.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `params.id` (ID do usuário).
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [string]: Mensagem de confirmação da exclusão.
+ */
 const deleteUser = async (req, res) => {
   try {
     const result = await client.query('DELETE FROM users WHERE id = $1 RETURNING *', [req.params.id]);
@@ -67,6 +125,17 @@ const deleteUser = async (req, res) => {
   }
 };
 
+/**
+ * Função 6
+ * Realiza o login de um usuário validando email e senha.
+ * 
+ * Parâmetros:
+ *  - req[Object]: Requisição contendo `body.email` e `body.password`.
+ *  - res[Object]: Resposta HTTP.
+ * 
+ * Retorno:
+ *  - [JSON]: Mensagem de sucesso e dados do usuário autenticado.
+ */
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -76,7 +145,7 @@ const loginUser = async (req, res) => {
     const user = result.rows[0];
 
     if (result.rows.length === 0 || !(await bcrypt.compare(password, result.rows[0].password))) {
-      return res.status(401).json({ error: 'Login ou senha inválidos'});
+      return res.status(401).json({ error: 'Login ou senha inválidos' });
     }
 
     res.status(200).json({
