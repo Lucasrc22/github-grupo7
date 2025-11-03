@@ -1,4 +1,38 @@
-// server.js
+/**
+ * server.js
+ *
+ * Servidor principal do backend do projeto MyFetus.
+ * Configura middlewares, rotas e inicializa o servidor Express.
+ *
+ * Funcionalidades:
+ * 1. Configuração do CORS:
+ *    - Permite requisições do frontend (React, Expo, etc.).
+ *    - Em produção, deve-se limitar o `origin` ao domínio autorizado.
+ *
+ * 2. Middlewares:
+ *    - `express.json()`: interpreta requisições com JSON.
+ *    - `express.urlencoded()`: interpreta formulários.
+ *
+ * 3. Rotas importadas:
+ *    - /api/users           → users.js
+ *    - /api/pregnants       → pregnants.js
+ *    - /api/pregnancies     → pregnancies.js
+ *    - /api/pregnancyEvents → pregnancyEvents.js
+ *    - /api/documents       → documents.js
+ *    - /api/medicoes        → medicoes.js
+ *
+ * 4. Rota de teste:
+ *    - GET /ping → retorna mensagem para verificar se o backend está ativo.
+ *
+ * 5. Inicialização do servidor:
+ *    - Porta configurável via `process.env.PORT` (default 3000).
+ *    - Host configurado como '0.0.0.0' para permitir conexões externas
+ *      dentro do container Docker.
+ *
+ * Observações:
+ * - Este arquivo deve ser o ponto de entrada do backend.
+ * - Todas as rotas estão prefixadas com `/api` para padronização.
+ */
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
