@@ -1,6 +1,24 @@
 -- ===============================================
 -- BANCO DE DADOS: MyFetus
 -- ===============================================
+-- Definição:
+--   Estrutura de criação das tabelas principais do sistema MyFetus,
+--   responsável por armazenar dados de usuários, gestantes, gestações,
+--   eventos gestacionais, documentos e medidas fetais.
+
+-- Parâmetros ou Atributos:
+--   - users: Cadastro de usuários do sistema.
+--   - pregnants: Dados clínicos e antecedentes das gestantes.
+--   - pregnancies: Informações de cada gestação registrada.
+--   - pregnancy_events: Registro de eventos e intercorrências gestacionais.
+--   - pregnant_documents: Armazenamento de documentos das gestantes.
+--   - medidas_fetais: Referência com medidas esperadas do feto por idade gestacional.
+
+-- Retorno:
+--   - Estruturas físicas das tabelas criadas no banco de dados com chaves primárias,
+--     estrangeiras e restrições de integridade referencial, preparadas para uso
+--     conjunto com as triggers definidas em "triggers.sql".
+-- ===============================================
 
 -- ===============================================
 -- Tabela de usuários
