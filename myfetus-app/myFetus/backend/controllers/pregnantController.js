@@ -42,7 +42,20 @@ const createPregnant = async (req, res) => {
  */
 const getPregnants = async (req, res) => {
   try {
-    const result = await client.query('SELECT * FROM pregnants');
+    // MUDANÇA: Fazer um JOIN para buscar o nome do usuário
+    const query = `
+      SELECT 
+        pregnants.id AS pregnant_id,
+        pregnants.user_id,
+        users.name AS patient_name 
+      FROM pregnants
+      JOIN users ON pregnants.user_id = users.id
+      WHERE users.role = 'user';
+    `;
+    // O "WHERE users.role = 'user'" garante que não vamos listar
+    // outros médicos (admins) como se fossem pacientes.
+
+    const result = await client.query(query);
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -140,6 +140,10 @@ CREATE TABLE IF NOT EXISTS pregnancies (
     ccn FLOAT DEFAULT 0.0,
     dgm FLOAT DEFAULT 0.0,
     glicemia DOUBLE PRECISION,
+<<<<<<< Updated upstream
+=======
+    frequencia_cardiaca INTEGER DEFAULT 0,
+>>>>>>> Stashed changes
     regularidade_do_ciclo BOOLEAN DEFAULT TRUE,
     ig_ultrassonografia DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

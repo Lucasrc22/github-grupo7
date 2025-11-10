@@ -6,47 +6,76 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  Alert,
+  ActivityIndicator
 } from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type RootStackParamList = {
-  OutraGestacao: undefined;
-  Cadastro: undefined;
-};
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'OutraGestacao'>;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const navigation = useNavigation<LoginScreenNavigationProp>();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter(); 
 
   const handleLogin = async () => {
+    if (!email || !senha) {
+      Alert.alert("Erro", "Por favor, preencha e-mail e senha.");
+      return;
+    }
+
+    setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/users', {
+      const response = await fetch('http://localhost:3000/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, senha }),
+        body: JSON.stringify({ email: email, password: senha }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Falha no login');
+        throw new Error(data.error || 'E-mail ou senha inválidos');
       }
 
-      const data = await response.json();
       console.log('Usuário autenticado:', data);
-      navigation.navigate('OutraGestacao');
+      
+      try {
+      await AsyncStorage.setItem('userData', JSON.stringify(data.user));
+    } catch (e) {
+      console.error('Erro ao salvar dados do usuário', e);
+    }
+      
+     
+
+      // admin ou user
+      if (data.user.role === 'admin') {
+        // admin (médico)
+        router.push('/doctor/dashboard'); 
+      } else {
+        // É um paciente (user)
+        router.push('/outra-gestacao'); // A tela padrão do paciente
+      }
+
     } catch (error) {
       console.error('Erro no login:', error);
+      Alert.alert('Erro no Login', error instanceof Error ? error.message : 'Tente novamente');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleCreateAccount = () => {
-    navigation.navigate('Cadastro');
+    router.push('/Cadastro?role=user');
+  };
+
+  const handleCreateDoctorAccount = () => {
+    router.push('/Cadastro?role=admin');
   };
 
   return (
@@ -74,6 +103,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor="#f9a9a7"
+            editable={!loading}
           />
           <TextInput
             placeholder="Senha"
@@ -82,14 +112,27 @@ export default function LoginScreen() {
             secureTextEntry
             style={styles.input}
             placeholderTextColor="#f9a9a7"
+            editable={!loading}
           />
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginText}>Login</Text>
+          <TouchableOpacity 
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]} 
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.loginText}>Login</Text>
+            )}
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={handleCreateAccount}>
-            <Text style={styles.createAccountText}>Crie uma conta</Text>
+          <TouchableOpacity onPress={handleCreateAccount} disabled={loading}>
+            <Text style={styles.createAccountText}>Crie uma conta (Paciente)</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity onPress={handleCreateDoctorAccount} disabled={loading} style={{ marginTop: 10 }}>
+            <Text style={styles.doctorAccountText}>Sou médico. Cadastrar</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -105,6 +148,7 @@ export default function LoginScreen() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -170,7 +214,10 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: "100%",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 15,
+  },
+  loginButtonDisabled: {
+    backgroundColor: "#f9a9a7aa",
   },
   loginText: {
     color: "#fff",
@@ -179,6 +226,11 @@ const styles = StyleSheet.create({
   },
   createAccountText: {
     color: "#20B2AA",
+    fontWeight: "bold",
+    fontSize: 14,
+  },
+  doctorAccountText: {
+    color: "#b34d7a",
     fontWeight: "bold",
     fontSize: 14,
   },

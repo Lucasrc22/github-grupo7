@@ -1,7 +1,8 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
+// IMPORTANTE: Adicionado useLocalSearchParams
+import { useRouter, useLocalSearchParams } from 'expo-router'; 
 
 export default function Cadastro() {
   const [nome, setNome] = useState('');
@@ -12,6 +13,10 @@ export default function Cadastro() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const router = useRouter();
+  
+  // Lê os parâmetros da URL ( role=admin)
+  const { role } = useLocalSearchParams();
+  const isMedico = role === 'admin';
 
   const validarEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,6 +52,7 @@ export default function Cadastro() {
       novosErros.email = 'E-mail inválido';
     }
 
+    
     if (!dataNascimento) {
       novosErros.dataNascimento = 'Data de nascimento é obrigatória';
     } else if (!validarData(dataNascimento)) {
@@ -97,17 +103,21 @@ export default function Cadastro() {
       const [dia, mes, ano] = dataNascimento.split('/');
       const dataFormatada = `${ano}-${mes}-${dia}`;
 
-      const response = await fetch('http://localhost:3000/api/users', {
+      // Prepara o objeto de dados, incluindo a 'role'
+      const dadosCadastro = {
+        name: nome,
+        email: email,
+        password: senha,
+        birthdate: dataFormatada, // O campo é enviado sempre
+        role: isMedico ? 'admin' : 'user' 
+      };
+
+      const response = await fetch('http://localhost:3000/api/users', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          name: nome,
-          email: email,
-          password: senha,
-          birthdate: dataFormatada
-        }),
+        body: JSON.stringify(dadosCadastro),
       });
 
       const data = await response.json();
@@ -160,6 +170,10 @@ export default function Cadastro() {
           style={styles.heartImage}
           resizeMode="contain"
         />
+        
+        {/* Título dinâmico */}
+        <Text style={styles.title}>{isMedico ? 'Cadastro Médico' : 'Crie sua Conta'}</Text>
+        
         <TextInput
           placeholder="Nome"
           value={nome}
@@ -188,6 +202,7 @@ export default function Cadastro() {
         />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
+        {/* Campo de Data de Nascimento agora é obrigatório para todos */}
         <TextInput
           placeholder="Data de Nascimento (DD/MM/AAAA)"
           value={dataNascimento}
@@ -258,6 +273,7 @@ export default function Cadastro() {
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -288,6 +304,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -60,
     zIndex: 3,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#555',
+    marginBottom: 20,
+    marginTop: 60,
   },
   input: {
     backgroundColor: "#fff",
