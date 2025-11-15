@@ -7,41 +7,33 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
-// --- Funções de Cálculo ---
-
-// 1. Cálculo do IMC
+// --- Funções de Cálculo  ---
 const calcularIMC = (peso: number, altura: number) => {
   if (!peso || !altura) return 0;
   return peso / (altura * altura);
 };
-
-// 2. Classificação do IMC
 const classificarIMC = (imc: number) => {
   if (imc < 18.5) return 'Abaixo do peso';
   if (imc < 24.9) return 'Normal';
   if (imc < 29.9) return 'Sobrepeso';
   return 'Obesidade';
 };
-
-// 3. Classificação de Ganho de Peso (Exemplo simples)
 const classificarGanhoPeso = (ganho: number) => {
-  if (ganho <= 0) return 'Normal'; // Lógica de exemplo
+  if (ganho <= 0) return 'Normal';
   if (ganho < 5) return 'Normal';
-  return 'Acima da Normalidade'; // Lógica de exemplo
+  return 'Acima da Normalidade';
 };
-
-// 4. Classificação de Frequência Cardíaca
 const classificarFC = (fc: number) => {
   if (!fc) return '';
   if (fc < 60) return 'Bradicardia';
   if (fc > 100) return 'Taquicardia';
   return 'Normal';
 };
-
-// 5. Classificação de Temperatura
 const classificarTemp = (temp: number) => {
   if (!temp) return '';
   if (temp >= 37.8) return 'Febre';
@@ -53,14 +45,14 @@ const classificarTemp = (temp: number) => {
 
 export default function InfoIniciaisScreen() {
   const router = useRouter();
-  const { patientId } = useLocalSearchParams(); // Pega o ID do paciente
+  const { patientId } = useLocalSearchParams(); 
 
-  // --- Estados do Formulário ---
-  const [altura, setAltura] = useState('1.65'); // Dado Falso
-  const [pesoPre, setPesoPre] = useState('60'); // Dado Falso
-  const [pesoAtual, setPesoAtual] = useState('64'); // Dado Falso
-  const [freqCardiaca, setFreqCardiaca] = useState('105'); // Dado Falso
-  const [temperatura, setTemperatura] = useState('37.9'); // Dado Falso
+  // --- Estados do Formulário  ---
+  const [altura, setAltura] = useState('');
+  const [pesoPre, setPesoPre] = useState('');
+  const [pesoAtual, setPesoAtual] = useState('');
+  const [freqCardiaca, setFreqCardiaca] = useState(''); // (AGORA É REAL)
+  const [temperatura, setTemperatura] = useState(''); // (AGORA É REAL)
 
   // --- Estados dos Cálculos ---
   const [imc, setImc] = useState(0);
@@ -70,94 +62,176 @@ export default function InfoIniciaisScreen() {
   const [classFc, setClassFc] = useState('');
   const [classTemp, setClassTemp] = useState('');
 
-  // --- useEffect para recalcular tudo ---
-  // Roda sempre que um dos valores do formulário mudar
-  useEffect(() => {
-    const numAltura = parseFloat(altura.replace(',', '.'));
-    const numPesoPre = parseFloat(pesoPre.replace(',', '.'));
-    const numPesoAtual = parseFloat(pesoAtual.replace(',', '.'));
-    const numFc = parseInt(freqCardiaca, 10);
-    const numTemp = parseFloat(temperatura.replace(',', '.'));
+  // --- Estados de Controle ---
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [pregnancyId, setPregnancyId] = useState<string | null>(null); // (NOVO)
 
-    // Cálculo IMC
+  // Helper
+  const parseInputFloat = (input: string) => {
+    if (input === '') return 0;
+    return parseFloat(input.replace(',', '.'));
+  }
+  const parseInputInt = (input: string) => {
+    if (input === '') return 0;
+    return parseInt(input, 10);
+  }
+
+  // --- useEffect para LER os dados ---
+  useEffect(() => {
+    if (!patientId) return;
+
+    const fetchPatientData = async () => {
+      try {
+        setLoading(true);
+        // 1. LENDO OS DADOS 
+        const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`);
+        if (!response.ok) {
+          throw new Error('Não foi possível buscar os dados da paciente');
+        }
+        const data = await response.json();
+        
+        // Dados da Tabela 'pregnants'
+        setAltura(data.altura ? String(data.altura) : '');
+        setPesoPre(data.peso_pregestacional ? String(data.peso_pregestacional) : '');
+        setPesoAtual(data.peso_atual ? String(data.peso_atual) : '');
+        setTemperatura(data.temperatura_materna ? String(data.temperatura_materna) : ''); // (NOVO)
+
+        // Dados da Tabela 'pregnancies' 
+        if (data.latest_pregnancy) {
+          setPregnancyId(data.latest_pregnancy.id);
+          setFreqCardiaca(data.latest_pregnancy.frequencia_cardiaca ? String(data.latest_pregnancy.frequencia_cardiaca) : ''); // (NOVO)
+        }
+
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Erro', error instanceof Error ? error.message : 'Erro de rede');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, [patientId]);
+
+
+  // --- useEffect para RECALCULAR ---
+  useEffect(() => {
+    const numAltura = parseInputFloat(altura);
+    const numPesoPre = parseInputFloat(pesoPre);
+    const numPesoAtual = parseInputFloat(pesoAtual);
+    const numFc = parseInputInt(freqCardiaca); 
+    const numTemp = parseInputFloat(temperatura); 
+
+    // ... (cálculos de IMC e Ganho de Peso)
     const novoImc = calcularIMC(numPesoPre, numAltura);
     setImc(novoImc);
     setClassImc(classificarIMC(novoImc));
 
-    // Cálculo Ganho de Peso
-    const novoGanho = numPesoAtual - numPesoPre;
-    setGanhoPeso(novoGanho);
-    setClassGanhoPeso(classificarGanhoPeso(novoGanho));
+    if (numPesoPre > 0 && numPesoAtual > 0) {
+      const novoGanho = numPesoAtual - numPesoPre;
+      setGanhoPeso(novoGanho);
+      setClassGanhoPeso(classificarGanhoPeso(novoGanho));
+    } else {
+      setGanhoPeso(0);
+      setClassGanhoPeso('');
+    }
 
-    // Classificações
+    
     setClassFc(classificarFC(numFc));
     setClassTemp(classificarTemp(numTemp));
     
   }, [altura, pesoPre, pesoAtual, freqCardiaca, temperatura]);
 
-  const handleNext = () => {
-    // Navega para a Tela 4, mantendo o ID do paciente
-    router.push(`/doctor/${patientId}/grafico`);
+  
+  // ---  handleNext faz DOIS SALVAMENTOS ---
+  const handleNext = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    
+    try {
+      // --- SALVAMENTO 1: Tabela 'pregnants' ---
+      const pregnantResponse = await fetch(`http://localhost:3000/api/pregnants/${patientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          altura: parseInputFloat(altura),
+          peso_pregestacional: parseInputFloat(pesoPre),
+          peso_atual: parseInputFloat(pesoAtual),
+          temperatura_materna: parseInputFloat(temperatura)
+        }),
+      });
+      if (!pregnantResponse.ok) {
+        throw new Error('Falha ao salvar os dados da gestante');
+      }
+      
+      // --- SALVAMENTO 2: Tabela 'pregnancies' ---
+      if (pregnancyId) { // Só salva se tivermos um ID de gestação
+        const pregnancyResponse = await fetch(`http://localhost:3000/api/pregnancies/${pregnancyId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            frequencia_cardiaca: parseInputInt(freqCardiaca) 
+          }),
+        });
+        if (!pregnancyResponse.ok) {
+          throw new Error('Falha ao salvar os dados da gestação');
+        }
+      } else {
+        console.warn("Não foi possível salvar Frequência Cardíaca: ID da gestação não encontrado.");
+      }
+
+      // 3. NAVEGANDO
+      router.push(`/doctor/${patientId}/grafico`);
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro ao Salvar', error instanceof Error ? error.message : 'Erro de rede');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  // Helper para cor da classificação
+  // Helper de cor 
   const getClassStyle = (classificacao: string) => {
     if (classificacao === 'Normal') return styles.classNormal;
     if (classificacao.includes('Acima') || classificacao === 'Taquicardia' || classificacao === 'Febre') return styles.classAmarelo;
     if (classificacao === 'Abaixo do peso') return styles.classAmarelo;
     if (classificacao === 'Bradicardia') return styles.classAmarelo;
-    return styles.classVermelho; // Obesidade, Taquicardia, Febre
+    return styles.classVermelho;
   };
+  
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ActivityIndicator size="large" color="#886aea" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
         
+        {/* --- DADOS REAIS --- */}
         <Text style={styles.label}>Altura da paciente (m)</Text>
-        <TextInput
-          style={styles.input}
-          value={altura}
-          onChangeText={setAltura}
-          placeholder="Ex: 1.65"
-          keyboardType="numeric"
-        />
-
+        <TextInput style={styles.input} value={altura} onChangeText={setAltura} placeholder="Ex: 1.65" keyboardType="numeric" editable={!isSaving} />
         <Text style={styles.label}>Peso pré-gestacional da paciente (kg)</Text>
-        <TextInput
-          style={styles.input}
-          value={pesoPre}
-          onChangeText={setPesoPre}
-          placeholder="Ex: 60"
-          keyboardType="numeric"
-        />
-
-        {/* Box do IMC */}
+        <TextInput style={styles.input} value={pesoPre} onChangeText={setPesoPre} placeholder="Ex: 60" keyboardType="numeric" editable={!isSaving} />
         <View style={styles.calcBox}>
           <Text style={styles.calcTitle}>IMC pré-gestacional</Text>
           <Text style={styles.calcValue}>{imc.toFixed(1)} kg/m²</Text>
-          <Text style={[styles.calcClass, getClassStyle(classImc)]}>
-            {classImc}
-          </Text>
+          <Text style={[styles.calcClass, getClassStyle(classImc)]}>{classImc}</Text>
         </View>
-
         <Text style={styles.label}>Peso atual (kg)</Text>
-        <TextInput
-          style={styles.input}
-          value={pesoAtual}
-          onChangeText={setPesoAtual}
-          placeholder="Ex: 64"
-          keyboardType="numeric"
-        />
-
-        {/* Box Ganho de Peso */}
+        <TextInput style={styles.input} value={pesoAtual} onChangeText={setPesoAtual} placeholder="Ex: 64" keyboardType="numeric" editable={!isSaving} />
         <View style={styles.calcBox}>
           <Text style={styles.calcTitle}>O ganho de peso foi</Text>
           <Text style={styles.calcValue}>{ganhoPeso.toFixed(0)} kg</Text>
-          <Text style={[styles.calcClass, getClassStyle(classGanhoPeso)]}>
-            {classGanhoPeso}
-          </Text>
+          <Text style={[styles.calcClass, getClassStyle(classGanhoPeso)]}>{classGanhoPeso}</Text>
         </View>
 
+        {/* --- DADOS REAIS  --- */}
         <Text style={styles.label}>Frequência Cardíaca</Text>
         <TextInput
           style={styles.input}
@@ -165,16 +239,14 @@ export default function InfoIniciaisScreen() {
           onChangeText={setFreqCardiaca}
           placeholder="bpm"
           keyboardType="numeric"
+          editable={!isSaving}
         />
-
-        {/* Box Frequência Cardíaca */}
         <View style={styles.calcBox}>
           <Text style={styles.calcTitle}>Classificação:</Text>
           <Text style={[styles.calcClass, getClassStyle(classFc)]}>
             {classFc}
           </Text>
         </View>
-
         <Text style={styles.label}>Temperatura Materna</Text>
         <TextInput
           style={styles.input}
@@ -182,19 +254,26 @@ export default function InfoIniciaisScreen() {
           onChangeText={setTemperatura}
           placeholder="°C"
           keyboardType="numeric"
+          editable={!isSaving}
         />
-
-        {/* Box Temperatura */}
         <View style={styles.calcBox}>
           <Text style={styles.calcTitle}>Classificação:</Text>
           <Text style={[styles.calcClass, getClassStyle(classTemp)]}>
             {classTemp}
           </Text>
         </View>
-
-        {/* Botão para a próxima tela */}
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Gráfico de Acompanhamento (Tela 4)</Text>
+        
+        {/* --- BOTÃO  --- */}
+        <TouchableOpacity 
+          style={[styles.button, isSaving && styles.buttonDisabled]}
+          onPress={handleNext}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Gráfico de Acompanhamento (Tela 4)</Text>
+          )}
         </TouchableOpacity>
 
       </ScrollView>
@@ -202,11 +281,11 @@ export default function InfoIniciaisScreen() {
   );
 }
 
-// Estilos baseados na sua Tela 3
+// Estilos 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#E6E0F8', // Cor de fundo
+    backgroundColor: '#E6E0F8',
   },
   container: {
     flexGrow: 1,
@@ -224,7 +303,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 15,
     fontSize: 16,
-    marginBottom: 10, // Menos espaço
+    marginBottom: 10,
   },
   calcBox: {
     alignItems: 'center',
@@ -246,20 +325,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   classNormal: {
-    color: '#27ae60', // Verde
+    color: '#27ae60',
   },
   classAmarelo: {
-    color: '#f39c12', // Amarelo
+    color: '#f39c12',
   },
   classVermelho: {
-    color: '#e74c3c', // Vermelho
+    color: '#e74c3c',
   },
   button: {
-    backgroundColor: '#886aea', // Um roxo mais forte
+    backgroundColor: '#886aea',
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 30,
+  },
+  buttonDisabled: { 
+    backgroundColor: '#aaa',
   },
   buttonText: {
     color: '#FFF',

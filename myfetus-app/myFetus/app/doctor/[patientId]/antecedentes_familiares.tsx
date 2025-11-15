@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,12 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator, 
+  Alert, 
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
-// --- COMPONENTE REUTILIZÁVEL ---
+// --- COMPONENTE REUTILIZÁVEL 'ToggleButton'  ---
 type ToggleButtonProps = {
   label: string;
   value: boolean;
@@ -47,20 +49,94 @@ const ToggleButton: React.FC<ToggleButtonProps> = ({ label, value, onToggle }) =
 
 export default function AntecedentesFamiliaresScreen() {
   const router = useRouter();
-  const { patientId } = useLocalSearchParams(); // Pega o ID do paciente
+  const { patientId } = useLocalSearchParams();
 
-  // --- Estados do Formulário ---
-  // (MOCK)
+  // --- Estados do Formulário  ---
   const [diabetes, setDiabetes] = useState(false);
   const [hipertensao, setHipertensao] = useState(false);
   const [gemelar, setGemelar] = useState(false);
   const [outros, setOutros] = useState(false);
   const [outrosTexto, setOutrosTexto] = useState('');
 
-  const handleNext = () => {
-    // Navega para a Tela 7, mantendo o ID do paciente
-    router.push(`/doctor/${patientId}/gestacao_anterior`);
+  // --- Estados de Controle  ---
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // --- useEffect para LER os dados ---
+  useEffect(() => {
+    if (!patientId) return;
+
+    const fetchPatientData = async () => {
+      try {
+        setLoading(true);
+        // 1. LENDO OS DADOS da API
+        const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`);
+        if (!response.ok) {
+          throw new Error('Não foi possível buscar os dados da paciente');
+        }
+        const data = await response.json();
+        
+        // Dados da Tabela 'pregnants'
+        setDiabetes(data.antecedentes_diabetes || false);
+        setHipertensao(data.antecedentes_hipertensao || false);
+        setGemelar(data.antecedentes_gemelar || false);
+        setOutros(data.antecedentes_outros || false);
+        setOutrosTexto(data.antecedentes_texto || ''); 
+
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Erro', error instanceof Error ? error.message : 'Erro de rede');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, [patientId]);
+
+
+  // ---  handleNext  SALVA os dados ---
+  const handleNext = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    
+    try {
+      // 1. ALIMENTANDO O BD (Tabela 'pregnants')
+      // Usando a rota de update de gestante
+      const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          antecedentes_diabetes: diabetes,
+          antecedentes_hipertensao: hipertensao,
+          antecedentes_gemelar: gemelar,
+          antecedentes_outros: outros,
+          antecedentes_texto: outrosTexto 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao salvar os dados');
+      }
+
+      // 2. NAVEGANDO
+      router.push(`/doctor/${patientId}/gestacao_anterior`);
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro ao Salvar', error instanceof Error ? error.message : 'Erro de rede');
+    } finally {
+      setIsSaving(false);
+    }
   };
+  
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ActivityIndicator size="large" color="#886aea" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -100,13 +176,22 @@ export default function AntecedentesFamiliaresScreen() {
               onChangeText={setOutrosTexto}
               placeholder="Descreva aqui..."
               multiline
+              editable={!isSaving}
             />
           </View>
         )}
 
         {/* Botão para a próxima tela */}
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Gestações Anteriores (Tela 7)</Text>
+        <TouchableOpacity 
+          style={[styles.button, isSaving && styles.buttonDisabled]}
+          onPress={handleNext}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Gestações Anteriores (Tela 7)</Text>
+          )}
         </TouchableOpacity>
 
       </ScrollView>
@@ -114,17 +199,16 @@ export default function AntecedentesFamiliaresScreen() {
   );
 }
 
-
+// Estilos 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#E6E0F8', 
+    backgroundColor: '#E6E0F8',
   },
   container: {
     flexGrow: 1,
     padding: 20,
   },
-  // --- Estilos do ToggleButton ---
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -154,7 +238,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   toggleBtnActive: {
-    backgroundColor: '#886aea', 
+    backgroundColor: '#886aea',
   },
   toggleText: {
     fontSize: 14,
@@ -164,7 +248,6 @@ const styles = StyleSheet.create({
   toggleTextActive: {
     color: '#FFF',
   },
-  // --- Fim dos Estilos do Toggle ---
   outrosContainer: {
     marginTop: 10,
   },
@@ -179,14 +262,17 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 16,
     minHeight: 120,
-    textAlignVertical: 'top', 
+    textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#886aea', 
+    backgroundColor: '#886aea',
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 40,
+  },
+  buttonDisabled: { 
+    backgroundColor: '#aaa',
   },
   buttonText: {
     color: '#FFF',

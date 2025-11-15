@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,13 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator, 
+  Alert, 
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
+
+
 
 // --- COMPONENTE REUTILIZÁVEL 'DateInput' ---
 type DateInputProps = {
@@ -17,56 +21,29 @@ type DateInputProps = {
   value: string;
   onChangeText: (text: string) => void;
   placeholder?: string;
+  editable?: boolean;
 };
-
-const DateInput: React.FC<DateInputProps> = ({ label, value, onChangeText, placeholder = "DD/MM/AAAA" }) => (
+const DateInput: React.FC<DateInputProps> = ({ label, value, onChangeText, placeholder = "DD/MM/AAAA", editable }) => (
   <View style={styles.dateInputContainer}>
     <Text style={styles.dateLabel}>{label}</Text>
     <TextInput
-      style={styles.dateInput}
+      style={[styles.dateInput, !editable && styles.dateInputDisabled]}
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
       keyboardType="numeric"
       maxLength={10}
+      editable={editable}
     />
   </View>
 );
 
-// --- COMPONENTE REUTILIZÁVEL 'RadioGroup' ---
-type RadioOption = { label: string; value: string };
-type RadioGroupProps = {
-  options: RadioOption[];
-  selectedValue: string;
-  onSelect: (value: string) => void;
-};
-
-const RadioGroup: React.FC<RadioGroupProps> = ({ options, selectedValue, onSelect }) => (
-  <View>
-    {options.map((option) => (
-      <TouchableOpacity
-        key={option.value}
-        style={styles.radioOption}
-        onPress={() => onSelect(option.value)}
-      >
-        <Ionicons
-          name={selectedValue === option.value ? 'radio-button-on' : 'radio-button-off'}
-          size={24}
-          color={selectedValue === option.value ? '#886aea' : '#aaa'}
-        />
-        <Text style={styles.radioLabel}>{option.label}</Text>
-      </TouchableOpacity>
-    ))}
-  </View>
-);
-
-// --- COMPONENTE REUTILIZÁVEL 'ToggleSwitch' (O SIM/NÃO) ---
+// --- COMPONENTE REUTILIZÁVEL 'ToggleSwitch'  ---
 type ToggleSwitchProps = {
   label: string;
   value: boolean;
   onToggle: (newValue: boolean) => void;
 };
-
 const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, value, onToggle }) => (
   <View style={styles.toggleContainer}>
     <Text style={styles.toggleLabel}>{label}</Text>
@@ -93,32 +70,136 @@ export default function VacinasScreen() {
   const { patientId } = useLocalSearchParams();
 
   // --- Estados do Formulário ---
-  const [antitetanica, setAntitetanica] = useState('mais_5_anos'); // Mock
+  const [antitetanica, setAntitetanica] = useState(false);
   const [antiDose1, setAntiDose1] = useState('');
   const [antiDose2, setAntiDose2] = useState('');
   const [antiDTpa, setAntiDTpa] = useState('');
 
-  const [hepatiteB, setHepatiteB] = useState(true); // Mock
+  const [hepatiteB, setHepatiteB] = useState(false);
   const [hepDose1, setHepDose1] = useState('');
   const [hepDose2, setHepDose2] = useState('');
   const [hepDose3, setHepDose3] = useState('');
 
-  const [influenza, setInfluenza] = useState(true); // Mock
+  const [influenza, setInfluenza] = useState(false);
   const [fluData, setFluData] = useState('');
 
-  const [covid, setCovid] = useState(true); // Mock
+  const [covid, setCovid] = useState(false);
   const [covidDose1, setCovidDose1] = useState('');
   const [covidDose2, setCovidDose2] = useState('');
 
-  const antitetanicaOptions = [
-    { label: 'Sem informações de Imunização', value: 'sem_info' },
-    { label: 'Imunizada há menos de 5 anos', value: 'menos_5_anos' },
-    { label: 'Imunizada há mais de 5 anos', value: 'mais_5_anos' },
-  ];
-  
-  const handleNext = () => {
-    router.push(`/doctor/${patientId}/historico_ultrassons`);
+  // --- Estados de Controle ---
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  //  Helper para formatar datas (lendo do BD)
+  const formatarDataParaExibir = (dataISO: string) => {
+    if (!dataISO) return "";
+    const dataObj = new Date(dataISO);
+    const dia = String(dataObj.getUTCDate()).padStart(2, '0');
+    const mes = String(dataObj.getUTCMonth() + 1).padStart(2, '0');
+    const ano = dataObj.getUTCFullYear();
+    return `${dia}/${mes}/${ano}`;
   };
+  
+  // Helper para salvar datas (enviando para o BD)
+  const formatarDataParaSalvar = (dataDisplay: string) => {
+    if (!dataDisplay || dataDisplay.length !== 10) return null; // Envia nulo se incompleto
+    const [dia, mes, ano] = dataDisplay.split('/');
+    // Validação simples
+    if (parseInt(mes) > 12 || parseInt(dia) > 31) return null;
+    return `${ano}-${mes}-${dia}`;
+  };
+
+  // ---  useEffect para LER os dados ---
+  useEffect(() => {
+    if (!patientId) return;
+    const fetchPatientData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`);
+        if (!response.ok) {
+          throw new Error('Não foi possível buscar os dados da paciente');
+        }
+        const data = await response.json();
+        
+        // Carregando dados da Tabela 'pregnants' (Vacinas)
+        setAntitetanica(data.vacina_antitetanica || false);
+        setAntiDose1(formatarDataParaExibir(data.vacina_antitetanica_1dose));
+        setAntiDose2(formatarDataParaExibir(data.vacina_antitetanica_2dose));
+        setAntiDTpa(formatarDataParaExibir(data.vacina_antitetanica_dtpa));
+
+        setHepatiteB(data.vacina_hepatite_b || false);
+        setHepDose1(formatarDataParaExibir(data.vacina_hepatite_b_1dose));
+        setHepDose2(formatarDataParaExibir(data.vacina_hepatite_b_2dose));
+        setHepDose3(formatarDataParaExibir(data.vacina_hepatite_b_3dose));
+
+        setInfluenza(data.vacina_influenza || false);
+        setFluData(formatarDataParaExibir(data.vacina_influenza_1dose));
+
+        setCovid(data.vacina_covid19 || false);
+        setCovidDose1(formatarDataParaExibir(data.vacina_covid19_1dose));
+        setCovidDose2(formatarDataParaExibir(data.vacina_covid19_2dose));
+
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Erro', error instanceof Error ? error.message : 'Erro de rede');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatientData();
+  }, [patientId]);
+
+  
+  // ---  handleNext agora SALVA os dados ---
+  const handleNext = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    
+    try {
+      // 1. ALIMENTANDO O BD (Tabela 'pregnants')
+      const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vacina_antitetanica: antitetanica,
+          vacina_antitetanica_1dose: formatarDataParaSalvar(antiDose1),
+          vacina_antitetanica_2dose: formatarDataParaSalvar(antiDose2),
+          vacina_antitetanica_dtpa: formatarDataParaSalvar(antiDTpa),
+          vacina_hepatite_b: hepatiteB,
+          vacina_hepatite_b_1dose: formatarDataParaSalvar(hepDose1),
+          vacina_hepatite_b_2dose: formatarDataParaSalvar(hepDose2),
+          vacina_hepatite_b_3dose: formatarDataParaSalvar(hepDose3),
+          vacina_influenza: influenza,
+          vacina_influenza_1dose: formatarDataParaSalvar(fluData),
+          vacina_covid19: covid,
+          vacina_covid19_1dose: formatarDataParaSalvar(covidDose1),
+          vacina_covid19_2dose: formatarDataParaSalvar(covidDose2),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Falha ao salvar os dados');
+      }
+
+      // 2. NAVEGANDO
+      router.push(`/doctor/${patientId}/historico_ultrassons`);
+
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro ao Salvar', error instanceof Error ? error.message : 'Erro de rede');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <ActivityIndicator size="large" color="#886aea" style={{ marginTop: 50 }} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -126,56 +207,51 @@ export default function VacinasScreen() {
         
         {/* --- Antitetânica --- */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Antitetânica</Text>
-          <RadioGroup
-            options={antitetanicaOptions}
-            selectedValue={antitetanica}
-            onSelect={setAntitetanica}
-          />
-          {/* Mostra as datas se a opção 'mais_5_anos' estiver selecionada */}
-          {antitetanica === 'mais_5_anos' && (
-            <View style={styles.dateRow}>
-              <DateInput label="1ª dose" value={antiDose1} onChangeText={setAntiDose1} />
-              <DateInput label="2ª dose" value={antiDose2} onChangeText={setAntiDose2} />
-              <DateInput label="Vacinas dTpa" value={antiDTpa} onChangeText={setAntiDTpa} />
-            </View>
-          )}
+        
+          <ToggleSwitch label="Antitetânica" value={antitetanica} onToggle={setAntitetanica} />
+          <View style={styles.dateRow}>
+            <DateInput label="1ª dose" value={antiDose1} onChangeText={setAntiDose1} editable={antitetanica && !isSaving} />
+            <DateInput label="2ª dose" value={antiDose2} onChangeText={setAntiDose2} editable={antitetanica && !isSaving} />
+            <DateInput label="Vacinas dTpa" value={antiDTpa} onChangeText={setAntiDTpa} editable={antitetanica && !isSaving} />
+          </View>
         </View>
 
         {/* --- Hepatite B --- */}
         <View style={styles.card}>
           <ToggleSwitch label="Hepatite B" value={hepatiteB} onToggle={setHepatiteB} />
-          {hepatiteB && (
-            <View style={styles.dateColumn}>
-              <DateInput label="1ª dose" value={hepDose1} onChangeText={setHepDose1} />
-              <DateInput label="2ª dose (1mês)" value={hepDose2} onChangeText={setHepDose2} />
-              <DateInput label="3ª dose (6meses)" value={hepDose3} onChangeText={setHepDose3} />
-            </View>
-          )}
+          <View style={styles.dateColumn}>
+            <DateInput label="1ª dose" value={hepDose1} onChangeText={setHepDose1} editable={hepatiteB && !isSaving} />
+            <DateInput label="2ª dose (1mês)" value={hepDose2} onChangeText={setHepDose2} editable={hepatiteB && !isSaving} />
+            <DateInput label="3ª dose (6meses)" value={hepDose3} onChangeText={setHepDose3} editable={hepatiteB && !isSaving} />
+          </View>
         </View>
 
         {/* --- Influenza --- */}
         <View style={styles.card}>
           <ToggleSwitch label="Influenza" value={influenza} onToggle={setInfluenza} />
-          {influenza && (
-            <DateInput label="Data" value={fluData} onChangeText={setFluData} />
-          )}
+          <DateInput label="Data" value={fluData} onChangeText={setFluData} editable={influenza && !isSaving} />
         </View>
 
         {/* --- Covid-19 --- */}
         <View style={styles.card}>
           <ToggleSwitch label="Covid-19" value={covid} onToggle={setCovid} />
-          {covid && (
-            <View style={styles.dateRow}>
-              <DateInput label="1ª dose" value={covidDose1} onChangeText={setCovidDose1} />
-              <DateInput label="2ª dose" value={covidDose2} onChangeText={setCovidDose2} />
-            </View>
-          )}
+          <View style={styles.dateRow}>
+            <DateInput label="1ª dose" value={covidDose1} onChangeText={setCovidDose1} editable={covid && !isSaving} />
+            <DateInput label="2ª dose" value={covidDose2} onChangeText={setCovidDose2} editable={covid && !isSaving} />
+          </View>
         </View>
 
         {/* Botão para a próxima tela */}
-        <TouchableOpacity style={styles.button} onPress={handleNext}>
-          <Text style={styles.buttonText}>Histórico de Ultrassons (Tela 11)</Text>
+        <TouchableOpacity 
+          style={[styles.button, isSaving && styles.buttonDisabled]}
+          onPress={handleNext}
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Histórico de Ultrassons (Tela 11)</Text>
+          )}
         </TouchableOpacity>
 
       </ScrollView>
@@ -183,10 +259,11 @@ export default function VacinasScreen() {
   );
 }
 
+// Estilos 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#E6E0F8', 
+    backgroundColor: '#E6E0F8',
   },
   container: {
     flexGrow: 1,
@@ -207,18 +284,6 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 15,
   },
-  // --- Estilos do Radio Button ---
-  radioOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  radioLabel: {
-    fontSize: 18,
-    color: '#333',
-    marginLeft: 10,
-  },
-  // --- Estilos do Toggle (SIM/NÃO) ---
   toggleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -242,7 +307,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   toggleBtnActive: {
-    backgroundColor: '#886aea', 
+    backgroundColor: '#886aea',
   },
   toggleText: {
     fontSize: 14,
@@ -252,10 +317,9 @@ const styles = StyleSheet.create({
   toggleTextActive: {
     color: '#FFF',
   },
-  // --- Estilos dos Inputs de Data ---
   dateRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap', // Permite quebra de linha se não couber
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginTop: 15,
   },
@@ -263,8 +327,9 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   dateInputContainer: {
-    width: '48%', 
+    width: '48%',
     marginBottom: 10,
+    minWidth: '48%', 
   },
   dateLabel: {
     fontSize: 14,
@@ -277,13 +342,19 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
-  // --- Botão de Navegação ---
+  dateInputDisabled: {
+    backgroundColor: '#E0E0E0',
+    color: '#999',
+  },
   button: {
     backgroundColor: '#886aea',
     padding: 15,
     borderRadius: 25,
     alignItems: 'center',
     marginTop: 20,
+  },
+  buttonDisabled: {
+    backgroundColor: '#aaa',
   },
   buttonText: {
     color: '#FFF',

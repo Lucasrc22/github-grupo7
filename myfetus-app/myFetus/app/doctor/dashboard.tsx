@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator, // Para mostrar "Carregando..."
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -43,17 +44,34 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 4. useEffect para BUSCAR OS DADOS 
+// ⬇️ SUBSTITUA SEU useEffect POR ESTE BLOCO ⬇️
   useEffect(() => {
+    
+    // --- Função 1: Busca o nome do Doutor do AsyncStorage ---
+    const loadDoctorName = async () => {
+      try {
+        const userDataString = await AsyncStorage.getItem('userData');
+        if (userDataString) {
+          const userData = JSON.parse(userDataString);
+          
+          const firstName = userData.name.split(' ')[0];
+          setDoctorName(`Dr. ${firstName}`); 
+        }
+      } catch (e) {
+        console.error('Erro ao ler dados do usuário', e);
+      }
+    };
+
+    // --- Função 2: Busca os pacientes da API ---
     const loadPatients = async () => {
       try {
-      
+        // Chamada
         const response = await fetch('http://localhost:3000/api/pregnants');
         if (!response.ok) {
           throw new Error('Erro ao buscar pacientes');
         }
         const data = await response.json();
-        setPatients(data); // Salva os pacientes reais no estado
+        setPatients(data); // Salva os pacientes no estado
       } catch (e) {
         console.error('Erro de fetch:', e);
         setError(e instanceof Error ? e.message : 'Erro de rede');
@@ -62,9 +80,9 @@ export default function DashboardScreen() {
       }
     };
 
-    loadPatients();
-    const loadDoctorName = async () => { /* ... (código do nome do Dr.) ... */ };
+    
     loadDoctorName();
+    loadPatients();
 
   }, []); 
 
@@ -88,9 +106,9 @@ export default function DashboardScreen() {
         <Text style={styles.patientNotification}>1 novo exame adicionado</Text>
       </View>
       <Ionicons
-        name={statusIcons['ok']} // Mock
+        name={statusIcons['ok']} 
         size={24}
-        color={statusColors['ok']} // Mock
+        color={statusColors['ok']} 
       />
     </TouchableOpacity>
   );
