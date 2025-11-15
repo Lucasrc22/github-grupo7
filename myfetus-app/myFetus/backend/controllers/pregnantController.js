@@ -139,16 +139,25 @@ const updatePregnant = async (req, res) => {
     antecedentes_clinicos_outros_texto,
     // Tela 9 
     gestacao_atual_fumante, gestacao_atual_quant_cigarros, gestacao_atual_alcool,
-    gestacao_atual_outras_drogas, gestacao_atual_hiv_aids, gestacao_atual_sifilis,
+    gestacao_atual_outras_drogas, 
+    gestacao_atual_hiv_aids, 
+    gestacao_atual_sifilis,
     gestacao_atual_toxoplasmose, gestacao_atual_infeccao_urinaria, gestacao_atual_anemia,
-    gestacao_atual_inc_istmocervical, gestacao_atual_ameaca_parto_premat,
-    gestacao_atual_imuniz_rh, gestacao_atual_oligo_polidramio,
-    gestacao_atual_rut_prem_membrana, gestacao_atual_ciur, gestacao_atual_pos_datismo,
-    gestacao_atual_febre, gestacao_atual_hipertensao_arterial,
-    gestacao_atual_pre_eclamp_eclamp, gestacao_atual_cardiopatia,
+    gestacao_atual_inc_istmocervical, 
+    gestacao_atual_ameaca_parto_premat, 
+    gestacao_atual_imuniz_rh, 
+    gestacao_atual_oligo_polidramio, 
+    gestacao_atual_rut_prem_membrana, 
+    gestacao_atual_ciur, gestacao_atual_pos_datismo,
+    gestacao_atual_febre, 
+    gestacao_atual_hipertensao_arterial, 
+    gestacao_atual_pre_eclamp_eclamp, 
+    gestacao_atual_cardiopatia,
     gestacao_atual_diabete_gestacional, gestacao_atual_uso_insulina,
-    gestacao_atual_hemorragia_1tri, gestacao_atual_hemorragia_2tri,
-    gestacao_atual_hemorragia_3trim, exantema_rash,
+    gestacao_atual_hemorragia_1trim, 
+    gestacao_atual_hemorragia_2trim, 
+    gestacao_atual_hemorragia_3trim, 
+    exantema_rash, 
     // Tela 10 (Vacinas)
     vacina_antitetanica, vacina_antitetanica_1dose, vacina_antitetanica_2dose, vacina_antitetanica_dtpa,
     vacina_hepatite_b, vacina_hepatite_b_1dose, vacina_hepatite_b_2dose, vacina_hepatite_b_3dose,
@@ -219,7 +228,7 @@ const updatePregnant = async (req, res) => {
   addField('antecedentes_clinicos_cirurgia', antecedentes_clinicos_cirurgia);
   addField('antecedentes_clinicos_outros', antecedentes_clinicos_outros);
   addField('antecedentes_clinicos_outros_texto', antecedentes_clinicos_outros_texto);
-  // Tela 9
+  // Tela 9 
   addField('gestacao_atual_fumante', gestacao_atual_fumante);
   addField('gestacao_atual_quant_cigarros', gestacao_atual_quant_cigarros);
   addField('gestacao_atual_alcool', gestacao_atual_alcool);
@@ -229,23 +238,23 @@ const updatePregnant = async (req, res) => {
   addField('gestacao_atual_toxoplasmose', gestacao_atual_toxoplasmose);
   addField('gestacao_atual_infeccao_urinaria', gestacao_atual_infeccao_urinaria);
   addField('gestacao_atual_anemia', gestacao_atual_anemia);
-  addField('gestacao_atual_inc_istmocervical', gestacao_atual_inc_istmocervical);
-  addField('gestacao_atual_ameaca_parto_premat', gestacao_atual_ameaca_parto_premat);
-  addField('gestacao_atual_imuniz_rh', gestacao_atual_imuniz_rh);
-  addField('gestacao_atual_oligo_polidramio', gestacao_atual_oligo_polidramio);
-  addField('gestacao_atual_rut_prem_membrana', gestacao_atual_rut_prem_membrana);
+  addField('gestacao_atual_inc_istmocervical', gestacao_atual_inc_istmocervical); 
+  addField('gestacao_atual_ameaca_parto_premat', gestacao_atual_ameaca_parto_premat); 
+  addField('gestacao_atual_imuniz_rh', gestacao_atual_imuniz_rh); 
+  addField('gestacao_atual_oligo_polidramio', gestacao_atual_oligo_polidramio); 
+  addField('gestacao_atual_rut_prem_membrana', gestacao_atual_rut_prem_membrana); 
   addField('gestacao_atual_ciur', gestacao_atual_ciur);
   addField('gestacao_atual_pos_datismo', gestacao_atual_pos_datismo);
   addField('gestacao_atual_febre', gestacao_atual_febre);
-  addField('gestacao_atual_hipertensao_arterial', gestacao_atual_hipertensao_arterial);
-  addField('gestacao_atual_pre_eclamp_eclamp', gestacao_atual_pre_eclamp_eclamp);
+  addField('gestacao_atual_hipertensao_arterial', gestacao_atual_hipertensao_arterial); 
+  addField('gestacao_atual_pre_eclamp_eclamp', gestacao_atual_pre_eclamp_eclamp); 
   addField('gestacao_atual_cardiopatia', gestacao_atual_cardiopatia);
   addField('gestacao_atual_diabete_gestacional', gestacao_atual_diabete_gestacional);
   addField('gestacao_atual_uso_insulina', gestacao_atual_uso_insulina);
-  addField('gestacao_atual_hemorragia_1tri', gestacao_atual_hemorragia_1tri);
-  addField('gestacao_atual_hemorragia_2tri', gestacao_atual_hemorragia_2tri);
-  addField('gestacao_atual_hemorragia_3tri', gestacao_atual_hemorragia_3trim);
-  addField('exantema_rash', exantema_rash);
+  addField('gestacao_atual_hemorragia_1trim', gestacao_atual_hemorragia_1trim); 
+  addField('gestacao_atual_hemorragia_2trim', gestacao_atual_hemorragia_2trim); 
+  addField('gestacao_atual_hemorragia_3trim', gestacao_atual_hemorragia_3trim);
+  addField('exantema_rash', exantema_rash); 
   // Tela 10 (Vacinas)
   addField('vacina_antitetanica', vacina_antitetanica);
   addField('vacina_antitetanica_1dose', vacina_antitetanica_1dose);
@@ -299,31 +308,52 @@ const updatePregnant = async (req, res) => {
  * Retorna uma gestante específica pelo ID,
  * incluindo o nome e data de nascimento (da tabela 'users').
  */
+/**
+ * Função (AGORA FINALÍSSIMA)
+ * Retorna uma gestante específica pelo ID,
+ * incluindo o nome, dados da última gestação E a lista de todos os exames.
+ */
 const getPregnantById = async (req, res) => {
   const { id } = req.params; // Este é o pregnant_id
 
   try {
+    // Esta query agora busca o 'latest_pregnancy' (com dpp/dum)
+    // E também busca 'all_events' (um array JSON de todos os exames)
     const query = `
-  SELECT 
-    u.name AS patient_name,
-    u.birthdate,
-    p.*, 
-    (
-      SELECT json_build_object(
-        'id', preg.id, 
-        'glicemia', preg.glicemia, 
-        'frequencia_cardiaca', preg.frequencia_cardiaca,
-        'altura_uterina', preg.altura_uterina 
-      )
-      FROM pregnancies preg
-      WHERE preg.pregnant_id = p.id
-      ORDER BY preg.created_at DESC
-      LIMIT 1
-    ) AS latest_pregnancy
-  FROM pregnants p
-  JOIN users u ON p.user_id = u.id
-  WHERE p.id = $1;
-`;
+      SELECT 
+        u.name AS patient_name,
+        u.birthdate,
+        p.*, 
+        (
+          SELECT json_build_object(
+            'id', preg.id, 
+            'glicemia', preg.glicemia, 
+            'frequencia_cardiaca', preg.frequencia_cardiaca,
+            'altura_uterina', preg.altura_uterina,
+            'dum', preg.dum, -- 
+            'dpp', preg.dpp  -- 
+          )
+          FROM pregnancies preg
+          WHERE preg.pregnant_id = p.id
+          ORDER BY preg.created_at DESC
+          LIMIT 1
+        ) AS latest_pregnancy,
+        (
+          SELECT json_agg(evt)
+          FROM (
+            SELECT pe.id, pe.descricao, pe.data_evento
+            FROM pregnancy_events pe
+            JOIN pregnancies preg ON pe.pregnancy_id = preg.id
+            WHERE preg.pregnant_id = p.id
+            ORDER BY pe.data_evento DESC
+          ) AS evt
+        ) AS all_events -- 
+
+      FROM pregnants p
+      JOIN users u ON p.user_id = u.id
+      WHERE p.id = $1;
+    `;
+
     const result = await client.query(query, [id]);
 
     if (result.rows.length === 0) {
