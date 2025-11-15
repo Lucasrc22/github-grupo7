@@ -37,16 +37,13 @@ PREGNANCY_PAYLOAD=$(cat <<EOF
   "pregnant_id": $PREGNANT_ID,
   "dum": "2025-02-01",
   "dpp": "2025-11-01",
-  "ig_ultrassonografia": 12,
+  "ig_ultrassonografia": "2025-02-15",
   "weeks": 10,
   "is_checked": false,
   "ccn": 0.0,
   "dgm": 0.0,
   "glicemia": 87.5,
-<<<<<<< Updated upstream
-=======
   "frequencia_cardiaca": 110,
->>>>>>> Stashed changes
   "regularidade_do_ciclo": true
 }
 EOF
@@ -78,11 +75,7 @@ DOC_RESPONSE=$(curl -s -X POST "$API_URL/documents" \
   -F "pregnant_id=$PREGNANT_ID" \
   -F "document_name=Ultrassom Inicial" \
   -F "document_type=pdf" \
-<<<<<<< Updated upstream
-  -F "file=@teste_documento.txt")   # <-- 'file' aqui precisa bater com upload.single('file')
-=======
   -F "document=@teste_documento.txt"   # <-- 'file' aqui precisa bater com upload.single('file')
->>>>>>> Stashed changes
 echo "✅ Documento enviado: $DOC_RESPONSE"
 
 

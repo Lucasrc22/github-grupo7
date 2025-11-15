@@ -96,7 +96,7 @@ const updateUser = async (req, res) => {
       updateData.password = hashedPassword;
     }
 
-    const updatedUser = await updateEntity('users', req.params.id, req.body);
+    const updatedUser = await updateEntity('users', req.params.id, updateData);
     if (!updatedUser) return res.status(404).send('Usuário não encontrado');
     res.json(updatedUser);
   } catch (err) {

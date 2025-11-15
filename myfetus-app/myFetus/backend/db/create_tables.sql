@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS pregnants (
   altura DOUBLE PRECISION,
   peso_pre_gestacional DOUBLE PRECISION,
   peso_atual DOUBLE PRECISION,
+  temperatura_materna DOUBLE PRECISION,
 
   -- Antecedentes obstétricos
   antecedentes_diabetes BOOLEAN DEFAULT FALSE,

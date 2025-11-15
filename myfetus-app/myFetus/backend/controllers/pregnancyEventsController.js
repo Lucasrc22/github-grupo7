@@ -41,8 +41,17 @@ const createEvent = async (req, res) => {
  *  - [JSON]: Lista de eventos cadastrados.
  */
 const getEvents = async (req, res) => {
+  const { pregnancy_id } = req.query; // Pega o ID da URL
+
+  if (!pregnancy_id) {
+    return res.status(400).json({ error: 'O pregnancy_id é obrigatório' });
+  }
+
   try {
-    const result = await client.query('SELECT * FROM pregnancy_events');
+    const result = await client.query(
+      'SELECT * FROM pregnancy_events WHERE pregnancy_id = $1 ORDER BY data_evento DESC',
+      [pregnancy_id]
+    );
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -30,6 +30,10 @@ CREATE TABLE IF NOT EXISTS pregnants (
     altura DOUBLE PRECISION,
     peso_pregestacional DOUBLE PRECISION,
     peso_atual DOUBLE PRECISION,
+    temperatura_materna DOUBLE PRECISION,
+    pressao_sistole INTEGER DEFAULT 0,   
+    pressao_diastole INTEGER DEFAULT 0,  
+
 
     antecedentes_diabetes BOOLEAN DEFAULT FALSE,
     antecedentes_hipertensao BOOLEAN DEFAULT FALSE,
@@ -108,7 +112,14 @@ CREATE TABLE IF NOT EXISTS pregnants (
 
     vacina_covid19 BOOLEAN DEFAULT FALSE,
     vacina_covid19_1dose TIMESTAMP,
-    vacina_covid19_2dose TIMESTAMP
+    vacina_covid19_2dose TIMESTAMP,
+
+    info_gerais_edemas TEXT,
+    info_gerais_sintomas TEXT,
+    info_gerais_estado_geral_1 TEXT,
+    info_gerais_estado_geral_2 TEXT,
+    info_gerais_nutricional TEXT,
+    info_gerais_psicossocial TEXT
 );
 
 -- Trigger para updated_at
@@ -140,10 +151,8 @@ CREATE TABLE IF NOT EXISTS pregnancies (
     ccn FLOAT DEFAULT 0.0,
     dgm FLOAT DEFAULT 0.0,
     glicemia DOUBLE PRECISION,
-<<<<<<< Updated upstream
-=======
     frequencia_cardiaca INTEGER DEFAULT 0,
->>>>>>> Stashed changes
+    altura_uterina DOUBLE PRECISION DEFAULT 0, 
     regularidade_do_ciclo BOOLEAN DEFAULT TRUE,
     ig_ultrassonografia DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
