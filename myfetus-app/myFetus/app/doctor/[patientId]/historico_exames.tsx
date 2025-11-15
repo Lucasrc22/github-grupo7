@@ -12,6 +12,16 @@ import {
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 
+//  input de data
+const formatarDataInput = (text: string) => {
+  const cleaned = text.replace(/\D/g, ''); // Remove tudo que não for dígito
+  if (cleaned.length > 4) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+  } else if (cleaned.length > 2) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
+  }
+  return cleaned;
+};
 //  Interface para os dados do exame
 interface Exame {
   id: string;
@@ -146,7 +156,7 @@ export default function ExamesScreen() {
               style={styles.input}
               placeholder="Data (DD/MM/AAAA)"
               value={novaData}
-              onChangeText={setNovaData}
+              onChangeText={(text) => setNovaData(formatarDataInput(text))} 
               keyboardType="numeric"
               maxLength={10}
             />

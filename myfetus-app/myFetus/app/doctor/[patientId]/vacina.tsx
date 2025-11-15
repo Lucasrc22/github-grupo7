@@ -15,6 +15,16 @@ import { Ionicons } from '@expo/vector-icons';
 
 
 
+
+const formatarDataInput = (text: string) => {
+  const cleaned = text.replace(/\D/g, ''); 
+  if (cleaned.length > 4) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4, 8)}`;
+  } else if (cleaned.length > 2) {
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}`;
+  }
+  return cleaned;
+};
 // --- COMPONENTE REUTILIZÁVEL 'DateInput' ---
 type DateInputProps = {
   label: string;
@@ -29,7 +39,7 @@ const DateInput: React.FC<DateInputProps> = ({ label, value, onChangeText, place
     <TextInput
       style={[styles.dateInput, !editable && styles.dateInputDisabled]}
       value={value}
-      onChangeText={onChangeText}
+      onChangeText={(text) => onChangeText(formatarDataInput(text))} 
       placeholder={placeholder}
       keyboardType="numeric"
       maxLength={10}
@@ -151,7 +161,7 @@ export default function VacinasScreen() {
   }, [patientId]);
 
   
-  // ---  handleNext agora SALVA os dados ---
+  // ---  handleNext  SALVA os dados ---
   const handleNext = async () => {
     if (isSaving) return;
     setIsSaving(true);

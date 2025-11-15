@@ -66,7 +66,14 @@ const InfoItem: React.FC<{ label: string; value: string; isSim: boolean }> = ({ 
 );
 // --- Fim dos Componentes ---
 
-//  Interface para os dados
+//  Interface para os Exames (Tela 12)
+interface Exame {
+  id: string;
+  descricao: string;
+  data_evento: string;
+}
+
+// Interface para os dados 
 interface PacienteCompleto {
   patient_name: string;
   birthdate: string;
@@ -76,23 +83,100 @@ interface PacienteCompleto {
   temperatura_materna: number;
   pressao_sistole: number;
   pressao_diastole: number;
+  
   latest_pregnancy: {
     id: string;
     weeks: number;
-    dum: string;
-    dpp: string;
+    dum: string; 
+    dpp: string; 
     glicemia: number;
-    frequencia_cardiaca: number; // BCF
+    frequencia_cardiaca: number; 
     altura_uterina: number;
   };
-  // Antecedentes (Telas 6, 7, 8, 9, 10, 13)
+  
+  all_events: Exame[] | null; 
+  
+  // Tela 6
   antecedentes_diabetes: boolean;
   antecedentes_hipertensao: boolean;
   antecedentes_gemelar: boolean;
   antecedentes_outros: boolean;
   antecedentes_texto: string;
   
+  // Tela 7
+  gestacao_partos: number;
+  gestacao_vaginal: number;
+  gestacao_cesarea: number;
+  gestacao_bebe_maior_45: boolean;
+  gestacao_bebe_maior_25: boolean;
+  gestacao_eclampsia_pre_eclampsia: boolean;
+  gestacao_gestas: boolean;
+  gestacao_abortos: number;
+  gestacao_mais_tres_abortos: boolean;
+  gestacao_nascidos_vivos: number;
+  gestacao_nascidos_mortos: number;
+  gestacao_vivem: number;
+  gestacao_mortos_primeira_semana: number;
+  gestacao_mortos_depois_primeira_semana: number;
+  gestacao_final_gestacao_anterior_1ano: boolean;
+  
+  // Tela 8
+  antecedentes_clinicos_diabetes: boolean;
+  antecedentes_clinicos_infeccao_urinaria: boolean;
+  antecedentes_clinicos_infertilidade: boolean;
+  antecedentes_clinicos_dific_amamentacao: boolean;
+  antecedentes_clinicos_cardiopatia: boolean;
+  antecedentes_clinicos_tromboembolismo: boolean;
+  antecedentes_clinicos_hipertensao_arterial: boolean;
+  antecedentes_clinicos_cirur_per_uterina: boolean;
+  antecedentes_clinicos_cirurgia: boolean;
+  antecedentes_clinicos_outros: boolean;
+  antecedentes_clinicos_outros_texto: string;
+  
+  // Tela 9
+  gestacao_atual_fumante: boolean;
+  gestacao_atual_quant_cigarros: number;
+  gestacao_atual_alcool: boolean;
+  gestacao_atual_outras_drogas: boolean;
+  gestacao_atual_hiv_aids: boolean;
+  gestacao_atual_sifilis: boolean;
+  gestacao_atual_toxoplasmose: boolean;
+  gestacao_atual_infeccao_urinaria: boolean;
+  gestacao_atual_anemia: boolean;
+  gestacao_atual_inc_istmocervical: boolean;
+  gestacao_atual_ameaca_parto_premat: boolean;
+  gestacao_atual_imuniz_rh: boolean;
+  gestacao_atual_oligo_polidramio: boolean;
+  gestacao_atual_rut_prem_membrana: boolean;
+  gestacao_atual_ciur: boolean;
+  gestacao_atual_pos_datismo: boolean;
+  gestacao_atual_febre: boolean;
+  gestacao_atual_hipertensao_arterial: boolean;
+  gestacao_atual_pre_eclamp_eclamp: boolean;
+  gestacao_atual_cardiopatia: boolean;
+  gestacao_atual_diabete_gestacional: boolean;
+  gestacao_atual_uso_insulina: boolean;
+  gestacao_atual_hemorragia_1trim: boolean;
+  gestacao_atual_hemorragia_2trim: boolean;
+  gestacao_atual_hemorragia_3trim: boolean;
+  exantema_rash: boolean;
+  
+  // Tela 10 
+  vacina_antitetanica: boolean;
+  vacina_antitetanica_1dose: string;
+  vacina_antitetanica_2dose: string;
+  vacina_antitetanica_dtpa: string;
+  vacina_hepatite_b: boolean;
+  vacina_hepatite_b_1dose: string;
+  vacina_hepatite_b_2dose: string;
+  vacina_hepatite_b_3dose: string;
+  vacina_influenza: boolean;
+  vacina_influenza_1dose: string;
+  vacina_covid19: boolean;
+  vacina_covid19_1dose: string;
+  vacina_covid19_2dose: string;
 
+  // Tela 13
   info_gerais_edemas: string;
   info_gerais_sintomas: string;
   info_gerais_estado_geral_1: string;
@@ -116,6 +200,7 @@ export default function ResumoScreen() {
     const fetchPatientData = async () => {
       try {
         setLoading(true);
+        
         const response = await fetch(`http://localhost:3000/api/pregnants/${patientId}`);
         if (!response.ok) {
           throw new Error('Não foi possível buscar os dados da paciente');
@@ -162,7 +247,7 @@ export default function ResumoScreen() {
     );
   }
 
-  // --- JSX ---
+  // --- JSX  ---
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -173,13 +258,15 @@ export default function ResumoScreen() {
           <Text style={styles.headerSub}>A paciente {risco}</Text>
         </View>
 
-        {/* --- SEÇÃO DE GESTAÇÃO --- */}
+        {/* --- SEÇÃO DE GESTAÇÃO (COM DPP) --- */}
         <View style={styles.card}>
           <SectionTitle title="Gestação Atual" />
           {paciente.latest_pregnancy ? (
             <View style={styles.gestacaoInfo}>
               <View>
-                <Text style={styles.gestacaoLabel}>Data prevista para o parto</Text>
+                <Text style={styles.gestacaoLabel}>Data da Última Menstruação (DUM):</Text>
+                <Text style={styles.gestacaoSemanas}>{formatarData(paciente.latest_pregnancy.dum)}</Text>
+                <Text style={styles.gestacaoLabel}>Data prevista para o parto (DPP):</Text>
                 <Text style={styles.gestacaoDPP}>{formatarData(paciente.latest_pregnancy.dpp)}</Text>
                 <Text style={styles.gestacaoSemanas}>{paciente.latest_pregnancy.weeks} semanas</Text>
               </View>
@@ -200,25 +287,50 @@ export default function ResumoScreen() {
           )}
         </View>
 
-        {/* --- SEÇÃO DE ANTECEDENTES (Tela 6) --- */}
-        <View style={styles.card}>
-          <SectionTitle title="Antecedentes Familiares" />
-          <InfoItem label="Diabetes" value={paciente.antecedentes_diabetes ? "SIM" : "NÃO"} isSim={paciente.antecedentes_diabetes} />
-          <InfoItem label="Hipertensão" value={paciente.antecedentes_hipertensao ? "SIM" : "NÃO"} isSim={paciente.antecedentes_hipertensao} />
-          <InfoItem label="Gemelar" value={paciente.antecedentes_gemelar ? "SIM" : "NÃO"} isSim={paciente.antecedentes_gemelar} />
-          <InfoItem label="Outros" value={paciente.antecedentes_outros ? "SIM" : "NÃO"} isSim={paciente.antecedentes_outros} />
-          {paciente.antecedentes_outros && <Text style={styles.infoText}>Descrição: {paciente.antecedentes_texto}</Text>}
-        </View>
-        
         {/* --- SEÇÃO DE DADOS ATUAIS (Tela 3 e 5) --- */}
         <View style={styles.card}>
           <SectionTitle title="Dados da Consulta" />
           <Text style={styles.infoText}>IMC pré-gestacional: {imc.toFixed(1)} kg/m² ({classImc})</Text>
           <Text style={styles.infoText}>Ganho de peso: {ganhoPeso.toFixed(0)} kg</Text>
           <Text style={styles.infoText}>Pressão Arterial: {pa} ({classPa})</Text>
-          
           <Text style={styles.infoText}>Glicemia em Jejum: {paciente.latest_pregnancy?.glicemia} mg/dL</Text>
           <Text style={styles.infoText}>Temperatura materna: {paciente.temperatura_materna} °C</Text>
+        </View>
+
+        {/* --- SEÇÃO DA TELA 7 --- */}
+        <View style={styles.card}>
+          <SectionTitle title="Gestações Anteriores" />
+          <InfoItem label="Partos" value={paciente.gestacao_partos.toString()} isSim={false} />
+          <InfoItem label="Abortos" value={paciente.gestacao_abortos.toString()} isSim={false} />
+          <InfoItem label="Bebê > 4,5kg" value={paciente.gestacao_bebe_maior_45 ? "SIM" : "NÃO"} isSim={paciente.gestacao_bebe_maior_45} />
+          <InfoItem label="Pré-eclampsia" value={paciente.gestacao_eclampsia_pre_eclampsia ? "SIM" : "NÃO"} isSim={paciente.gestacao_eclampsia_pre_eclampsia} />
+        </View>
+
+        {/* --- SEÇÃO DA TELA 8 --- */}
+        <View style={styles.card}>
+          <SectionTitle title="Antecedentes Clínicos" />
+          <InfoItem label="Diabetes" value={paciente.antecedentes_clinicos_diabetes ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_diabetes} />
+          <InfoItem label="Cardiopatia" value={paciente.antecedentes_clinicos_cardiopatia ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_cardiopatia} />
+          <InfoItem label="Hipertensão" value={paciente.antecedentes_clinicos_hipertensao_arterial ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_hipertensao_arterial} />
+        </View>
+
+        {/* --- SEÇÃO DA TELA 9 --- */}
+        <View style={styles.card}>
+          <SectionTitle title="Gestação Atual (Riscos)" />
+          <InfoItem label="Fumante" value={paciente.gestacao_atual_fumante ? `SIM (${paciente.gestacao_atual_quant_cigarros}/dia)` : "NÃO"} isSim={paciente.gestacao_atual_fumante} />
+          <InfoItem label="Álcool" value={paciente.gestacao_atual_alcool ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_alcool} />
+          <InfoItem label="Anemia" value={paciente.gestacao_atual_anemia ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_anemia} />
+          <InfoItem label="Diabetes Gestacional" value={paciente.gestacao_atual_diabete_gestacional ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_diabete_gestacional} />
+          <InfoItem label="Hemorragia 1º Trim" value={paciente.gestacao_atual_hemorragia_1trim ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hemorragia_1trim} />
+        </View>
+        
+        {/* --- SEÇÃO DA TELA 10 (COM DATAS) --- */}
+        <View style={styles.card}>
+          <SectionTitle title="Vacinas" />
+          <InfoItem label="Antitetânica" value={paciente.vacina_antitetanica ? `SIM (1ª: ${formatarData(paciente.vacina_antitetanica_1dose)})` : "NÃO"} isSim={paciente.vacina_antitetanica} />
+          <InfoItem label="Hepatite B" value={paciente.vacina_hepatite_b ? `SIM (1ª: ${formatarData(paciente.vacina_hepatite_b_1dose)})` : "NÃO"} isSim={paciente.vacina_hepatite_b} />
+          <InfoItem label="Influenza" value={paciente.vacina_influenza ? `SIM (Data: ${formatarData(paciente.vacina_influenza_1dose)})` : "NÃO"} isSim={paciente.vacina_influenza} />
+          <InfoItem label="Covid-19" value={paciente.vacina_covid19 ? `SIM (1ª: ${formatarData(paciente.vacina_covid19_1dose)})` : "NÃO"} isSim={paciente.vacina_covid19} />
         </View>
 
         {/* --- SEÇÃO DE GRÁFICOS (Placeholders) --- */}
@@ -232,17 +344,42 @@ export default function ResumoScreen() {
           </View>
         </View>
 
-        {/* --- SEÇÃO DE INFORMAÇÕES GERAIS (Tela 13) --- */}
+        {/* --- SEÇÃO DA TELA  (EXAMES) --- */}
+        <View style={styles.card}>
+          <SectionTitle title="Histórico de Exames" />
+          {paciente.all_events && paciente.all_events.length > 0 ? (
+            paciente.all_events.map((exame) => (
+              <View key={exame.id} style={styles.exameItem}>
+                <Text style={styles.exameData}>{formatarData(exame.data_evento)}</Text>
+                <Text style={styles.infoText}>{exame.descricao}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.infoText}>(Nenhum exame registrado)</Text>
+          )}
+        </View>
+
+        {/* --- SEÇÃO DA TELA (INFO GERAIS) --- */}
          <View style={styles.card}>
           <SectionTitle title="Informações Gerais" />
+          
           <Text style={styles.infoLabel}>Edemas em membros inferiores:</Text>
           <Text style={styles.infoText}>{paciente.info_gerais_edemas || "(Vazio)"}</Text>
           
           <Text style={styles.infoLabel}>Sintomas/ Sinais de complicações:</Text>
           <Text style={styles.infoText}>{paciente.info_gerais_sintomas || "(Vazio)"}</Text>
           
+          <Text style={styles.infoLabel}>Estado Geral da Gestante (Campo 1):</Text>
+          <Text style={styles.infoText}>{paciente.info_gerais_estado_geral_1 || "(Vazio)"}</Text>
+          
+          <Text style={styles.infoLabel}>Estado Geral da Gestante (Campo 2):</Text>
+          <Text style={styles.infoText}>{paciente.info_gerais_estado_geral_2 || "(Vazio)"}</Text>
+          
           <Text style={styles.infoLabel}>Avaliação Nutricional:</Text>
           <Text style={styles.infoText}>{paciente.info_gerais_nutricional || "(Vazio)"}</Text>
+          
+          <Text style={styles.infoLabel}>Avaliação Psicossocial e emocional:</Text>
+          <Text style={styles.infoText}>{paciente.info_gerais_psicossocial || "(Vazio)"}</Text>
         </View>
 
         {/* Botão para VOLTAR AO INÍCIO */}
@@ -255,7 +392,7 @@ export default function ResumoScreen() {
   );
 }
 
-// Estilos 
+// Estilos (Adicionado 'exameItem' e 'exameData')
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -299,8 +436,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   gestacaoLabel: {
-    fontSize: 14,
+    fontSize: 16, // Aumentado
     color: '#555',
+    fontWeight: '500',
   },
   gestacaoDPP: {
     fontSize: 22,
@@ -310,6 +448,7 @@ const styles = StyleSheet.create({
   gestacaoSemanas: {
     fontSize: 18,
     color: '#555',
+    marginTop: 5,
   },
   fetoPlaceholder: {
     width: 120,
@@ -326,6 +465,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#444',
     marginBottom: 5,
+    lineHeight: 22,
   },
   textGrave: {
     color: '#e74c3c',
@@ -363,6 +503,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#aaa',
   },
+  //  Estilos para Tela 12
+  exameItem: {
+    backgroundColor: '#f9f9f9',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  exameData: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#555',
+    marginBottom: 5,
+  },
+  // --- Fim Estilos Tela 12 ---
   button: {
     backgroundColor: '#886aea',
     padding: 15,
