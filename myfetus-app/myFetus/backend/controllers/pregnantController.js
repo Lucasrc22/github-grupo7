@@ -45,12 +45,20 @@ const getPregnants = async (req, res) => {
     // MUDANÇA: Fazer um JOIN para buscar o nome do usuário
     const query = `
       SELECT 
-        pregnants.id AS pregnant_id,
-        pregnants.user_id,
-        users.name AS patient_name 
-      FROM pregnants
-      JOIN users ON pregnants.user_id = users.id
-      WHERE users.role = 'user';
+        p.id AS pregnant_id,
+        p.user_id,
+        u.name AS patient_name,
+        u.birthdate,
+        (
+          SELECT weeks 
+          FROM pregnancies preg 
+          WHERE preg.pregnant_id = p.id 
+          ORDER BY created_at DESC 
+          LIMIT 1
+        ) AS semanas_gestacao
+      FROM pregnants p
+      JOIN users u ON p.user_id = u.id
+      WHERE u.role = 'user';
     `;
     // O "WHERE users.role = 'user'" garante que não vamos listar
     // outros médicos (admins) como se fossem pacientes.
@@ -328,6 +336,7 @@ const getPregnantById = async (req, res) => {
           SELECT json_build_object(
             'id', preg.id, 
             'glicemia', preg.glicemia, 
+            'weeks', preg.weeks,
             'frequencia_cardiaca', preg.frequencia_cardiaca,
             'altura_uterina', preg.altura_uterina,
             'dum', preg.dum, -- 

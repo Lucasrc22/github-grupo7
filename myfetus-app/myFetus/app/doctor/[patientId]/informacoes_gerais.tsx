@@ -175,7 +175,7 @@ export default function InformacoesGeraisScreen() {
           {isSaving ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Finalizar e Voltar</Text>
+            <Text style={styles.buttonText}>Dashboard da Paciente</Text>
           )}
         </TouchableOpacity>
 

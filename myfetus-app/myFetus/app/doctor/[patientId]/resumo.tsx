@@ -224,7 +224,7 @@ export default function ResumoScreen() {
 
   // ---  Cálculos derivados ---
   const idade = paciente ? calcularIdade(new Date(paciente.birthdate)) : 0;
-  const risco = idade >= 35 ? "é considerada gravidez de Risco" : "não é considerada gravidez de Risco";
+  const risco = (idade >= 35 || idade <= 15) ? "é considerada gravidez de Risco" : "não é considerada gravidez de Risco";
   const imc = paciente ? calcularIMC(paciente.peso_pregestacional, paciente.altura) : 0;
   const classImc = classificarIMC(imc);
   const ganhoPeso = paciente ? paciente.peso_atual - paciente.peso_pregestacional : 0;
@@ -293,9 +293,19 @@ export default function ResumoScreen() {
           <Text style={styles.infoText}>IMC pré-gestacional: {imc.toFixed(1)} kg/m² ({classImc})</Text>
           <Text style={styles.infoText}>Ganho de peso: {ganhoPeso.toFixed(0)} kg</Text>
           <Text style={styles.infoText}>Pressão Arterial: {pa} ({classPa})</Text>
+          <Text style={styles.infoText}>Frequência Cardíaca: {paciente.latest_pregnancy?.frequencia_cardiaca} bpm</Text>
           <Text style={styles.infoText}>Glicemia em Jejum: {paciente.latest_pregnancy?.glicemia} mg/dL</Text>
           <Text style={styles.infoText}>Temperatura materna: {paciente.temperatura_materna} °C</Text>
         </View>
+
+        {/* --- SEÇÃO DA TELA 6 --- */}
+        <View style={styles.card}> 
+          <SectionTitle title="Antecedentes Familiares" />
+          <InfoItem label="Diabetes" value={paciente.antecedentes_diabetes ? "SIM" : "NÃO"} isSim={paciente.antecedentes_diabetes} /> 
+          <InfoItem label="Hipertensão Arterial" value={paciente.antecedentes_hipertensao ? "SIM" : "NÃO"} isSim={paciente.antecedentes_hipertensao} /> 
+          <InfoItem label="Gemelar" value={paciente.antecedentes_gemelar ? "SIM" : "NÃO"} isSim={paciente.antecedentes_gemelar} />  
+          <InfoItem label="Outros" value={paciente.antecedentes_outros ? `SIM (${paciente.antecedentes_texto})` : "NÃO"} isSim={paciente.antecedentes_outros} />  
+        </View> 
 
         {/* --- SEÇÃO DA TELA 7 --- */}
         <View style={styles.card}>
@@ -304,6 +314,17 @@ export default function ResumoScreen() {
           <InfoItem label="Abortos" value={paciente.gestacao_abortos.toString()} isSim={false} />
           <InfoItem label="Bebê > 4,5kg" value={paciente.gestacao_bebe_maior_45 ? "SIM" : "NÃO"} isSim={paciente.gestacao_bebe_maior_45} />
           <InfoItem label="Pré-eclampsia" value={paciente.gestacao_eclampsia_pre_eclampsia ? "SIM" : "NÃO"} isSim={paciente.gestacao_eclampsia_pre_eclampsia} />
+          <InfoItem label="Nascidos Vivos" value={paciente.gestacao_nascidos_vivos.toString()} isSim={false} />
+          <InfoItem label="Nascidos Mortos" value={paciente.gestacao_nascidos_mortos.toString()} isSim={false} />
+          <InfoItem label="Mortos na 1ª Semana" value={paciente.gestacao_mortos_primeira_semana.toString()} isSim={false} />
+          <InfoItem label="Mortos após 1ª Semana" value={paciente.gestacao_mortos_depois_primeira_semana.toString()} isSim={false} /> 
+          <InfoItem label="Mais de 3 Abortos" value={paciente.gestacao_mais_tres_abortos ? "SIM" : "NÃO"} isSim={paciente.gestacao_mais_tres_abortos} />
+          <InfoItem label="Finalização Gestação Anterior em até 1 ano" value={paciente.gestacao_final_gestacao_anterior_1ano ? "SIM" : "NÃO"} isSim={paciente.gestacao_final_gestacao_anterior_1ano} />
+          <InfoItem label="Partos Vaginais" value={paciente.gestacao_vaginal.toString()} isSim={false} />
+          <InfoItem label="Partos Cesáreas" value={paciente.gestacao_cesarea.toString()} isSim={false} />
+          <InfoItem label="Gestações" value={paciente.gestacao_gestas.toString()} isSim={false} />
+          <InfoItem label="Vivem" value={paciente.gestacao_vivem.toString()} isSim={false} />
+          <InfoItem label="Abortos" value={paciente.gestacao_abortos.toString()} isSim={false} />   
         </View>
 
         {/* --- SEÇÃO DA TELA 8 --- */}
@@ -312,6 +333,14 @@ export default function ResumoScreen() {
           <InfoItem label="Diabetes" value={paciente.antecedentes_clinicos_diabetes ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_diabetes} />
           <InfoItem label="Cardiopatia" value={paciente.antecedentes_clinicos_cardiopatia ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_cardiopatia} />
           <InfoItem label="Hipertensão" value={paciente.antecedentes_clinicos_hipertensao_arterial ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_hipertensao_arterial} />
+          <InfoItem label="Tromboembolismo" value={paciente.antecedentes_clinicos_tromboembolismo ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_tromboembolismo} />
+          <InfoItem label="Cirurgia Periuterina" value={paciente.antecedentes_clinicos_cirur_per_uterina ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_cirur_per_uterina} />
+          <InfoItem label="Infecção Urinária" value={paciente.antecedentes_clinicos_infeccao_urinaria ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_infeccao_urinaria} />
+          <InfoItem label="Infertilidade" value={paciente.antecedentes_clinicos_infertilidade ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_infertilidade} />
+          <InfoItem label="Dificuldade na Amamentação" value={paciente.antecedentes_clinicos_dific_amamentacao ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_dific_amamentacao} />
+          <InfoItem label="Cirurgia" value={paciente.antecedentes_clinicos_cirurgia ? "SIM" : "NÃO"} isSim={paciente.antecedentes_clinicos_cirurgia} />
+          <InfoItem label="Outros" value={paciente.antecedentes_clinicos_outros ? `SIM (${paciente.antecedentes_clinicos_outros_texto})` : "NÃO"} isSim={paciente.antecedentes_clinicos_outros} />
+          
         </View>
 
         {/* --- SEÇÃO DA TELA 9 --- */}
@@ -322,14 +351,37 @@ export default function ResumoScreen() {
           <InfoItem label="Anemia" value={paciente.gestacao_atual_anemia ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_anemia} />
           <InfoItem label="Diabetes Gestacional" value={paciente.gestacao_atual_diabete_gestacional ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_diabete_gestacional} />
           <InfoItem label="Hemorragia 1º Trim" value={paciente.gestacao_atual_hemorragia_1trim ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hemorragia_1trim} />
+          <InfoItem label="Hemorragia 2º Trim" value={paciente.gestacao_atual_hemorragia_2trim ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hemorragia_2trim} />
+          <InfoItem label="Hemorragia 3º Trim" value={paciente.gestacao_atual_hemorragia_3trim ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hemorragia_3trim} />
+          <InfoItem label="HIV/AIDS" value={paciente.gestacao_atual_hiv_aids ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hiv_aids} />
+          <InfoItem label="Sífilis" value={paciente.gestacao_atual_sifilis ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_sifilis} />
+          <InfoItem label="Toxoplasmose" value={paciente.gestacao_atual_toxoplasmose ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_toxoplasmose} />
+          <InfoItem label="Infecção Urinária" value={paciente.gestacao_atual_infeccao_urinaria ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_infeccao_urinaria} />  
+          <InfoItem label="Hipertensão Arterial" value={paciente.gestacao_atual_hipertensao_arterial ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_hipertensao_arterial} /> 
+          <InfoItem label="Pré-eclâmpsia/Eclâmpsia" value={paciente.gestacao_atual_pre_eclamp_eclamp ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_pre_eclamp_eclamp} />  
+          <InfoItem label="Cardiopatia" value={paciente.gestacao_atual_cardiopatia ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_cardiopatia} />
+          <InfoItem label="Uso de Insulina" value={paciente.gestacao_atual_uso_insulina ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_uso_insulina} />
+          <InfoItem label="Exantema/Rash" value={paciente.exantema_rash ? "SIM" : "NÃO"} isSim={paciente.exantema_rash} />  
+          <InfoItem label="Outras Drogas" value={paciente.gestacao_atual_outras_drogas ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_outras_drogas} />  
+          <InfoItem label="Imunização Rh" value={paciente.gestacao_atual_imuniz_rh ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_imuniz_rh} />  
+          <InfoItem label="Ameaça de Parto Prematuro" value={paciente.gestacao_atual_ameaca_parto_premat ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_ameaca_parto_premat} />  
+          <InfoItem label="Oligo/Polidramnio" value={paciente.gestacao_atual_oligo_polidramio ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_oligo_polidramio} />
+          <InfoItem label="Ruptura Prematura de Membranas" value={paciente.gestacao_atual_rut_prem_membrana ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_rut_prem_membrana} />  
+          <InfoItem label="CIUR" value={paciente.gestacao_atual_ciur ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_ciur} />  
+          <InfoItem label="Pos-datismo" value={paciente.gestacao_atual_pos_datismo ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_pos_datismo} />  
+          <InfoItem label="Febre" value={paciente.gestacao_atual_febre ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_febre} />  
+          <InfoItem label="Diabetes Gestacional" value={paciente.gestacao_atual_diabete_gestacional ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_diabete_gestacional} /> 
+          <InfoItem label="Uso de Insulina" value={paciente.gestacao_atual_uso_insulina ? "SIM" : "NÃO"} isSim={paciente.gestacao_atual_uso_insulina} />  
+        
+
         </View>
         
         {/* --- SEÇÃO DA TELA 10 (COM DATAS) --- */}
         <View style={styles.card}>
           <SectionTitle title="Vacinas" />
-          <InfoItem label="Antitetânica" value={paciente.vacina_antitetanica ? `SIM (1ª: ${formatarData(paciente.vacina_antitetanica_1dose)})` : "NÃO"} isSim={paciente.vacina_antitetanica} />
-          <InfoItem label="Hepatite B" value={paciente.vacina_hepatite_b ? `SIM (1ª: ${formatarData(paciente.vacina_hepatite_b_1dose)})` : "NÃO"} isSim={paciente.vacina_hepatite_b} />
-          <InfoItem label="Influenza" value={paciente.vacina_influenza ? `SIM (Data: ${formatarData(paciente.vacina_influenza_1dose)})` : "NÃO"} isSim={paciente.vacina_influenza} />
+          <InfoItem label="Antitetânica" value={paciente.vacina_antitetanica ? `SIM (1ª: ${formatarData(paciente.vacina_antitetanica_1dose)} 2ª ${formatarData(paciente.vacina_antitetanica_2dose)})` : "NÃO"} isSim={paciente.vacina_antitetanica} />
+          <InfoItem label="Hepatite B" value={paciente.vacina_hepatite_b ? `SIM (1ª: ${formatarData(paciente.vacina_hepatite_b_1dose)} 2ª: ${formatarData(paciente.vacina_hepatite_b_2dose)} 3ª: ${formatarData(paciente.vacina_hepatite_b_3dose)})` : "NÃO"} isSim={paciente.vacina_hepatite_b} />
+          <InfoItem label="Influenza" value={paciente.vacina_influenza ? `SIM (1ª Data: ${formatarData(paciente.vacina_influenza_1dose)} )` : "NÃO"} isSim={paciente.vacina_influenza} />
           <InfoItem label="Covid-19" value={paciente.vacina_covid19 ? `SIM (1ª: ${formatarData(paciente.vacina_covid19_1dose)})` : "NÃO"} isSim={paciente.vacina_covid19} />
         </View>
 

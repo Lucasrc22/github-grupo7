@@ -204,9 +204,9 @@ export default function IdentificacaoScreen() {
         <View style={styles.infoBox}>
           <Text style={[
               styles.infoValue, 
-              idade >= 35 ? styles.riscoAlto : styles.riscoNormal
+              (idade >= 35 || idade <= 15) ? styles.riscoAlto : styles.riscoNormal
             ]}>
-            {idade >= 35 ? 'Considerado Gravidez de Risco' : 'Não é considerado gravidez de Risco'}
+            {(idade >= 35 || idade <= 15) ? 'Considerado Gravidez de Risco' : 'Não é considerado gravidez de Risco'}
           </Text>
         </View>
 
