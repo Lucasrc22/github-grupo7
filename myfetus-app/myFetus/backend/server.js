@@ -57,6 +57,7 @@ const pregnancyRoutes = require('./routes/pregnancies');
 const pregnancyEventsRoutes = require('./routes/pregnancyEvents');
 const documentsRoutes = require('./routes/documents');
 const medicoesRoutes = require('./routes/medicoes');
+const ultrassomRoutes = require('./routes/ultrassomRoutes');
 
 //Prefixo /api para padronização das rotas
 app.use('/api/users', userRoutes);
@@ -65,6 +66,7 @@ app.use('/api/pregnancies', pregnancyRoutes);
 app.use('/api/pregnancyEvents', pregnancyEventsRoutes);
 app.use('/api/documents', documentsRoutes);
 app.use('/api/medicoes', medicoesRoutes);
+app.use('/api/ultrassons', ultrassomRoutes);
 
 //Rota de teste (para verificar se o backend está no ar)
 app.get('/ping', (req, res) => {
