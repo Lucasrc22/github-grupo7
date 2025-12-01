@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS pregnants (
   altura DOUBLE PRECISION,
   peso_pre_gestacional DOUBLE PRECISION,
   peso_atual DOUBLE PRECISION,
+  temperatura_materna DOUBLE PRECISION,
 
   -- Antecedentes obstétricos
   antecedentes_diabetes BOOLEAN DEFAULT FALSE,
@@ -144,6 +145,7 @@ CREATE TABLE IF NOT EXISTS pregnancies (
   ccn FLOAT NOT NULL DEFAULT 0.00,
   dgm FLOAT NOT NULL DEFAULT 0.00,
   glicemia DOUBLE PRECISION DEFAULT 0,
+  frequencia_cardiaca INTEGER DEFAULT 0,
   regularidade_do_ciclo BOOLEAN DEFAULT TRUE,
   ig_ultrassonografia DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
